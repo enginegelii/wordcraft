@@ -1,0 +1,26 @@
+{
+  "name": "WordCraft — İngilizce Öğren",
+  "short_name": "WordCraft",
+  "description": "Kelimelerini AI ile zenginleştir, oyunlarla öğren",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff7ed",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "games"],
+  "lang": "tr"
+}

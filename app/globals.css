@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 30% 98%;
+    --foreground: 20 14% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 10%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 20% 93%;
+    --secondary-foreground: 20 14% 20%;
+    --muted: 30 20% 93%;
+    --muted-foreground: 25 8% 45%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --radius: 0.75rem;
+
+    /* Status colors */
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --info: 217 91% 60%;
+  }
+
+  .dark {
+    --background: 222 20% 8%;
+    --foreground: 30 20% 95%;
+    --card: 222 20% 12%;
+    --card-foreground: 30 20% 95%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 15% 18%;
+    --secondary-foreground: 30 15% 85%;
+    --muted: 222 15% 18%;
+    --muted-foreground: 222 10% 55%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --border: 222 15% 20%;
+    --input: 222 15% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-[hsl(var(--border))];
+  }
+
+  body {
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar stilleri */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[hsl(var(--border))] rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[hsl(var(--muted-foreground))];
+  }
+}
+
+@layer components {
+  /* Kart flip efekti */
+  .flip-card {
+    perspective: 1000px;
+  }
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .flip-card-inner.flipped {
+    transform: rotateY(180deg);
+  }
+  .flip-card-front,
+  .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: var(--radius);
+  }
+  .flip-card-back {
+    transform: rotateY(180deg);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-500 to-brand-600 bg-clip-text text-transparent;
+  }
+
+  /* Glow efekti */
+  .glow-brand {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+  }
+
+  /* Status badge'leri */
+  .badge-new { @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400; }
+  .badge-learning { @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400; }
+  .badge-review { @apply bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400; }
+  .badge-mastered { @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400; }
+}
+
+/* Konfeti canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* PWA safe-area */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
