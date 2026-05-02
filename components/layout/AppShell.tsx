@@ -29,7 +29,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const words = useAppStore((s) => s.words);
   const getDueWords = useAppStore((s) => s.getDueWords);
 
-  // localStorage henüz yüklenmediyse bekle
   if (!hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))]">
@@ -47,7 +46,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Giriş yapılmamışsa login ekranı göster
   if (!isAuthenticated) {
     return <LoginScreen />;
   }
@@ -75,14 +73,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* User Stats */}
         <div className="px-4 py-4 border-b border-[hsl(var(--border))]">
           <div className="flex items-center gap-3 mb-3">
-            {/* Streak */}
             <div className="flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/30 rounded-lg px-3 py-1.5">
               <Flame className="w-4 h-4 text-orange-500 animate-streak-flame" />
               <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">
                 {stats.streakCount}
               </span>
             </div>
-            {/* XP */}
             <div className="flex items-center gap-1.5 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg px-3 py-1.5">
               <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
               <span className="font-bold text-yellow-600 dark:text-yellow-400 text-sm">
@@ -90,7 +86,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </span>
             </div>
           </div>
-          {/* Level Progress */}
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
               <div className="flex items-center gap-1">
@@ -196,4 +191,50 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[hsl(var(--card))]/95 backdrop-blur-md border-t border-[hsl(var(--border))] pb-safe">
+        <div className="flex items-center justify-around px-2 py-2">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = item.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(item.href);
+
+            if (item.href === "/add") {
+              return (
+                <Link key={item.href} href={item.href} className="relative -mt-6">
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30 transition-transform active:scale-95",
+                    "bg-gradient-to-br from-brand-400 to-brand-600"
+                  )}>
+                    <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
+                  </div>
+                </Link>
+              );
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all relative",
+                  isActive
+                    ? "text-brand-500"
+                    : "text-[hsl(var(--muted-foreground))]"
+                )}
+              >
+                <Icon className="w-6 h-6" />
+                <span className="text-[10px] font-medium">{item.label}</span>
+                {item.href === "/play" && dueCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {dueCount > 9 ? "9+" : dueCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
+}
