@@ -9,70 +9,87 @@ import { shuffle, playSound, triggerHaptic } from "@/lib/utils";
 import type { Word } from "@/lib/types";
 import confetti from "canvas-confetti";
 
-// ─── DETERMINISTIC RAND (consistent between renders) ─────────────────────────
 const sr = (seed: number) => { const x = Math.sin(seed + 1) * 10000; return x - Math.floor(x); };
 
-// ─── CHAPTER DATA ─────────────────────────────────────────────────────────────
+type Speaker = "player" | "enemy";
+interface DialogueLine { speaker: Speaker; text: string; }
+
+// ─── CHAPTER DATA (all English) ──────────────────────────────────────────────
 const CHAPTERS = [
   {
-    id: 1, title: "Kapının Sırrı", location: "Antik Tapınak • Giriş",
-    enemy: { emoji: "🛡️", name: "Taş Bekçi", subtitle: "Tapınağın ilk muhafızı" },
+    id: 1, title: "The Gate's Secret", location: "Ancient Temple • Entrance",
+    enemy: { emoji: "🛡️", name: "Stone Guardian", subtitle: "The temple's first warden" },
     accent: "#6366f1", particles: "#818cf8",
-    narrative: [
-      "Yüzyıllardır aranılan tapınağın önündesindir. Bozkırda tek başına, yalnızca bilginle donanmış.",
-      "Dev kapının üzerindeki kadim yazı titrek ışıkla parlıyor: «Girmek isteyenler bilgisini ispatlasın.»",
-      "Kapıdan ağır bir ses yükseliyor. Taş Bekçi uyanıyor...",
+    dialogue: [
+      { speaker: "enemy" as Speaker, text: "Who dares approach the sacred temple?! These words are bound by ancient law!" },
+      { speaker: "player" as Speaker, text: "I seek the words imprisoned here. Stand aside, Guardian." },
+      { speaker: "enemy" as Speaker, text: "Then prove your worth. Answer my riddle... or face eternal silence!" },
     ],
-    challengeText: "Bekçi gürbüz sesiyle soruyor:",
-    successText: ["Bekçi yavaşça geride çekiliyor, senin gücüne boyun eğiyor.", "Kapı gıcırdayarak açılıyor. Tapınak seni içine çekiyor."],
+    challengeText: "What does this word mean?",
+    successDialogue: [
+      { speaker: "player" as Speaker, text: "Your riddle is solved. The word is free." },
+      { speaker: "enemy" as Speaker, text: "...Remarkable. The gate is yours, Word Seeker." },
+    ],
   },
   {
-    id: 2, title: "Gölge Sentinel", location: "Karanlık Koridor • Alt Katman",
-    enemy: { emoji: "🗿", name: "Gölge Sentinel", subtitle: "Koridorun karanlık muhafızı" },
+    id: 2, title: "Shadow Sentinel", location: "Dark Corridor • Lower Level",
+    enemy: { emoji: "🗿", name: "Shadow Sentinel", subtitle: "Guardian of the corridor" },
     accent: "#8b5cf6", particles: "#a78bfa",
-    narrative: [
-      "Taş duvarlar arasında ilerlerken hava ağırlaşıyor. Her adım yankılanıyor.",
-      "Mor gözlü bir figür duvardan sıyrılarak önüne çıkıyor: Gölge Sentinel.",
-      "\"Buradan geçmek istiyorsan bilginin bedelini öde!\" diye fısıldıyor, sesi her yerden geliyor.",
+    dialogue: [
+      { speaker: "enemy" as Speaker, text: "Turn back, wanderer. The darkness here devours the unworthy." },
+      { speaker: "player" as Speaker, text: "I've come too far to retreat. The words call to me." },
+      { speaker: "enemy" as Speaker, text: "Then face me! Your mind is your only weapon in this darkness!" },
     ],
-    challengeText: "Sentinel'in gözleri sana sabitleniyor:",
-    successText: ["Sentinel bir çığlık atıp duman haline geliyor.", "Koridor açılıyor. Daha derinlere iniyorsun."],
+    challengeText: "The Sentinel demands an answer:",
+    successDialogue: [
+      { speaker: "enemy" as Speaker, text: "You... you actually knew this! How is that possible?!" },
+      { speaker: "player" as Speaker, text: "Step aside. There are more words to free." },
+    ],
   },
   {
-    id: 3, title: "Uçurum Ruhu", location: "Kristal Köprü • Sonsuz Boşluk",
-    enemy: { emoji: "🌀", name: "Uçurum Ruhu", subtitle: "Sonsuzluğun bekçisi" },
+    id: 3, title: "Spirit of the Abyss", location: "Crystal Bridge • Endless Void",
+    enemy: { emoji: "🌀", name: "Abyss Spirit", subtitle: "Guardian of the void" },
     accent: "#06b6d4", particles: "#67e8f9",
-    narrative: [
-      "Önünde sonsuz bir uçurum uzanıyor. Karanlığın dibinde hiçbir şey görünmüyor.",
-      "İnce kristal köprünün ortasında saydam bir ruh süzülüyor, seni izliyor.",
-      "Her adımda bir kelime soruyor. Yanlış adım at... düşüşün sonu olmaz.",
+    dialogue: [
+      { speaker: "enemy" as Speaker, text: "One wrong step and you fall... forever. Can your mind hold against the void?" },
+      { speaker: "player" as Speaker, text: "Knowledge is my shield. The void holds no fear for me." },
+      { speaker: "enemy" as Speaker, text: "Bold! Let us see if your knowledge matches your courage!" },
     ],
-    challengeText: "Köprü sallantıya geçti! Hızlı cevapla:",
-    successText: ["Ruh bir çığlık atarak dağılıyor.", "Köprü sakinleşiyor. Karşı kıyı seni bekliyor."],
+    challengeText: "The bridge trembles! Choose fast:",
+    successDialogue: [
+      { speaker: "enemy" as Speaker, text: "Astonishing... the words bow to you. Cross, Word Seeker." },
+      { speaker: "player" as Speaker, text: "The dark tower lies ahead. I press on." },
+    ],
   },
   {
-    id: 4, title: "Gölge Büyücüsü", location: "Kara Kule • Zirve",
-    enemy: { emoji: "🧙", name: "Gölge Büyücüsü", subtitle: "Kelimelerin hırsızı" },
+    id: 4, title: "Shadow Sorcerer", location: "Dark Tower • Summit",
+    enemy: { emoji: "🧙", name: "Shadow Sorcerer", subtitle: "Thief of words" },
     accent: "#a855f7", particles: "#d8b4fe",
-    narrative: [
-      "Kule'nin zirvesinde seni bekleyen figür yavaşça dönüyor. Gözleri alev gibi yanıyor.",
-      "\"Sen... gerçekten buraya kadar geldin mi?!\" diye bağırıyor.",
-      "\"Kelimeler BENİM gücüm. ONLARI ALAMAZSIN!\" Büyüsünü fırlatmaya hazırlanıyor.",
+    dialogue: [
+      { speaker: "enemy" as Speaker, text: "You've come this far?! I'm impressed... and furious!" },
+      { speaker: "player" as Speaker, text: "Return every stolen word, Sorcerer. This ends now." },
+      { speaker: "enemy" as Speaker, text: "These words are MINE! Prepare to face my ultimate power!" },
     ],
-    challengeText: "Büyücü son büyüsünü fırlatıyor!",
-    successText: ["Büyücü geride savruldu! \"İmkânsız... nasıl bu kadar bildin?!\"", "Karanlık dağılıyor. Kule aydınlanıyor. Son oda seni bekliyor."],
+    challengeText: "The Sorcerer casts his spell:",
+    successDialogue: [
+      { speaker: "enemy" as Speaker, text: "Impossible! My power is fading! How do you know all this?!" },
+      { speaker: "player" as Speaker, text: "Because I never stopped learning. The final chamber awaits." },
+    ],
   },
   {
-    id: 5, title: "Kadim Bekçi", location: "Hazine Odası • Son Oda",
-    enemy: { emoji: "🔮", name: "Kadim Bekçi", subtitle: "Tapınağın kendisi" },
+    id: 5, title: "The Ancient Keeper", location: "Treasure Hall • Final Chamber",
+    enemy: { emoji: "🔮", name: "Ancient Keeper", subtitle: "The temple's true guardian" },
     accent: "#f59e0b", particles: "#fcd34d",
-    narrative: [
-      "Altın ışıkla dolup taşan son odadasın. Binlerce kelime etrafında dans ediyor.",
-      "Kristal bir küre titreyerek açılıyor. Bir ses: \"Gerçekten bu gücü taşımaya layk mısın?\"",
-      "Son sınav. Tapınağın kendisi seni test ediyor. Her şeyini ortaya koy.",
+    dialogue: [
+      { speaker: "enemy" as Speaker, text: "Word Seeker... you have proven yourself beyond all expectation." },
+      { speaker: "player" as Speaker, text: "I am ready for the final test. Whatever it may be." },
+      { speaker: "enemy" as Speaker, text: "The words themselves shall judge you. Are you truly their guardian?" },
     ],
-    challengeText: "Son sınav. Kelimeni kanıtla:",
-    successText: ["Kelimeler sana doğru uçuşuyor, etrafında dans ediyor.", "Sen artık bir Kelime Ustasısın. Efsane yazıldı. 🌟"],
+    challengeText: "The final question:",
+    successDialogue: [
+      { speaker: "enemy" as Speaker, text: "You've done it. The words are free. You are their true guardian." },
+      { speaker: "player" as Speaker, text: "Not their master... their keeper. I will carry them always." },
+    ],
   },
 ];
 
@@ -86,33 +103,19 @@ function SceneBackground({ id }: { id: number }) {
       </defs>
       <rect width="400" height="260" fill="url(#sg1)"/>
       {Array.from({length:40},(_,i)=><circle key={i} cx={sr(i*3)*380+10} cy={sr(i*7)*140+5} r={sr(i*11)*1.2+0.3} fill="white" opacity={sr(i*5)*0.7+0.2}/>)}
-      {/* Left pillar */}
       <rect x="0" y="60" width="55" height="200" fill="#111827" rx="3"/>
       <rect x="0" y="50" width="70" height="18" fill="#1f2937" rx="2"/>
-      <rect x="15" y="100" width="8" height="60" fill="#6366f120" rx="2"/>
-      <rect x="28" y="110" width="8" height="50" fill="#6366f120" rx="2"/>
-      {/* Right pillar */}
       <rect x="345" y="60" width="55" height="200" fill="#111827" rx="3"/>
       <rect x="330" y="50" width="70" height="18" fill="#1f2937" rx="2"/>
-      <rect x="370" y="100" width="8" height="60" fill="#6366f120" rx="2"/>
-      <rect x="357" y="110" width="8" height="50" fill="#6366f120" rx="2"/>
-      {/* Gate glow */}
       <ellipse cx="200" cy="260" rx="160" ry="100" fill="url(#arch1)"/>
-      {/* Arch outline */}
       <path d="M 70 260 Q 70 100 200 80 Q 330 100 330 260" fill="none" stroke="#6366f180" strokeWidth="2"/>
-      {/* Runes */}
-      {[90,130,170].map(y=><text key={y} x="30" y={y} fontSize="8" fill="#6366f160" fontFamily="monospace">᛫</text>)}
-      {[90,130,170].map(y=><text key={y} x="360" y={y} fontSize="8" fill="#6366f160" fontFamily="monospace">᛫</text>)}
-      {/* Torches */}
       <rect x="58" y="105" width="6" height="14" fill="#78350f" rx="1"/>
       <ellipse cx="61" cy="102" rx="5" ry="9" fill="#f97316" opacity="0.9"/>
       <ellipse cx="61" cy="99" rx="3" ry="6" fill="#fde68a" opacity="0.9"/>
       <rect x="336" y="105" width="6" height="14" fill="#78350f" rx="1"/>
       <ellipse cx="339" cy="102" rx="5" ry="9" fill="#f97316" opacity="0.9"/>
       <ellipse cx="339" cy="99" rx="3" ry="6" fill="#fde68a" opacity="0.9"/>
-      {/* Ground */}
       <rect x="0" y="225" width="400" height="35" fill="#0a0f1e"/>
-      {[0,50,100,150,200,250,300,350].map(x=><line key={x} x1={x} y1="225" x2={x+50} y2="260" stroke="#1e293b" strokeWidth="0.7"/>)}
     </svg>
   );
   if (id === 2) return (
@@ -122,25 +125,10 @@ function SceneBackground({ id }: { id: number }) {
         <radialGradient id="mist2" cx="50%" cy="80%"><stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
       <rect width="400" height="260" fill="url(#sg2)"/>
-      {/* Corridor perspective lines */}
-      {[-1,0,1,2,3].map(i=><line key={i} x1={0} y1={60+i*50} x2={400} y2={60+i*50} stroke="#1e1340" strokeWidth="0.5"/>)}
-      {/* Left wall */}
       {[0,60,120,180,240,300,360].map(x=><line key={x} x1={x} y1={0} x2={200} y2={260} stroke="#1e1340" strokeWidth="0.5"/>)}
-      {/* Right wall */}
-      {[40,100,160,220,280,340,400].map(x=><line key={x} x1={x} y1={0} x2={200} y2={260} stroke="#1e1340" strokeWidth="0.3"/>)}
-      {/* Wall blocks left */}
       {[0,80,160].map(y=><rect key={y} x="0" y={y} width="60" height="75" fill="#0d0820" stroke="#1e1340" strokeWidth="1"/>)}
-      {/* Wall blocks right */}
       {[0,80,160].map(y=><rect key={y} x="340" y={y} width="60" height="75" fill="#0d0820" stroke="#1e1340" strokeWidth="1"/>)}
-      {/* Glowing symbols on walls */}
-      {[30,110,190].map(y=><text key={y} x="22" y={y+20} fontSize="14" fill="#8b5cf660" textAnchor="middle">✦</text>)}
-      {[30,110,190].map(y=><text key={y} x="378" y={y+20} fontSize="14" fill="#8b5cf660" textAnchor="middle">✦</text>)}
-      {/* Mist at floor */}
       <rect x="0" y="200" width="400" height="60" fill="url(#mist2)"/>
-      {/* Purple torch glow */}
-      <ellipse cx="30" cy="80" rx="25" ry="20" fill="#8b5cf6" opacity="0.15"/>
-      <ellipse cx="370" cy="80" rx="25" ry="20" fill="#8b5cf6" opacity="0.15"/>
-      {/* Vanishing point glow */}
       <ellipse cx="200" cy="200" rx="80" ry="50" fill="#8b5cf6" opacity="0.12"/>
       {Array.from({length:20},(_,i)=><circle key={i} cx={sr(i*4)*380+10} cy={sr(i*9)*80} r={sr(i*6)*1+0.3} fill="#a78bfa" opacity={sr(i*2)*0.4+0.1}/>)}
     </svg>
@@ -153,32 +141,16 @@ function SceneBackground({ id }: { id: number }) {
       </defs>
       <rect width="400" height="260" fill="url(#sg3)"/>
       {Array.from({length:30},(_,i)=><circle key={i} cx={sr(i*3)*380+10} cy={sr(i*7)*120} r={sr(i*11)*1.3+0.2} fill="#67e8f9" opacity={sr(i*5)*0.5+0.1}/>)}
-      {/* Abyss - bottomless pit */}
       <rect x="0" y="150" width="400" height="110" fill="#000"/>
-      {/* Depth lines in abyss */}
       {[0,1,2,3,4,5].map(i=><ellipse key={i} cx="200" cy={150+i*20} rx={180-i*20} ry={8} fill="none" stroke="#06b6d410" strokeWidth="1"/>)}
-      {/* Crystal bridge segments */}
       {[0,1,2,3,4,5,6,7].map(i=>(
         <g key={i}>
           <rect x={30+i*48} y="140" width="40" height="14" fill="#0e7490" rx="3" opacity="0.8"/>
           <rect x={30+i*48} y="140" width="40" height="5" fill="#67e8f9" rx="2" opacity="0.6"/>
-          {/* Gap */}
-          <rect x={70+i*48} y="140" width="8" height="14" fill="transparent"/>
         </g>
       ))}
-      {/* Bridge glow */}
       <rect x="28" y="148" width="344" height="2" fill="#06b6d4" opacity="0.5"/>
-      {/* Floating crystal fragments */}
-      {[80,160,240,320].map((x,i)=>(
-        <g key={i}>
-          <polygon points={`${x},${90+i*5} ${x+8},${100+i*5} ${x+4},${85+i*5}`} fill="#67e8f9" opacity="0.4"/>
-        </g>
-      ))}
-      {/* Abyss glow from below */}
       <ellipse cx="200" cy="260" rx="200" ry="60" fill="url(#abyss)"/>
-      {/* Fog/mist on sides */}
-      <rect x="0" y="130" width="60" height="40" fill="#0a1929" opacity="0.8"/>
-      <rect x="340" y="130" width="60" height="40" fill="#0a1929" opacity="0.8"/>
     </svg>
   );
   if (id === 4) return (
@@ -188,27 +160,17 @@ function SceneBackground({ id }: { id: number }) {
         <radialGradient id="sorm" cx="50%" cy="0%"><stop offset="0%" stopColor="#a855f7" stopOpacity="0.4"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
       <rect width="400" height="260" fill="url(#sg4)"/>
-      {/* Storm clouds */}
       {[[40,20,80,25],[120,10,100,30],[220,5,120,28],[320,15,80,22],[80,40,90,20],[260,35,100,25]].map(([x,y,w,h],i)=>(
         <ellipse key={i} cx={x} cy={y} rx={w} ry={h} fill="#1a0a2e" opacity="0.9"/>
       ))}
-      {/* Lightning */}
       <polyline points="250,0 245,40 255,40 242,90" stroke="#a855f7" strokeWidth="1.5" fill="none" opacity="0.7"/>
       <polyline points="150,0 148,35 158,35 145,80" stroke="#c084fc" strokeWidth="1" fill="none" opacity="0.5"/>
-      {/* Storm glow */}
       <rect x="0" y="0" width="400" height="80" fill="url(#sorm)"/>
-      {/* Tower battlements */}
       {[0,40,80,120,160,200,240,280,320,360].map(x=><rect key={x} x={x} y="185" width="30" height="20" fill="#1a0a2e" rx="1"/>)}
       <rect x="0" y="200" width="400" height="60" fill="#120720"/>
-      {/* Tower windows glowing */}
-      {[60,180,320].map(x=><rect key={x} x={x} y="210" width="20" height="28" fill="#7c3aed" opacity="0.5" rx="2"/>)}
-      {[60,180,320].map(x=><rect key={x} x={x+4} y="214" width="12" height="20" fill="#a855f7" opacity="0.7" rx="1"/>)}
       {Array.from({length:20},(_,i)=><circle key={i} cx={sr(i*4)*380+10} cy={sr(i*8)*160+20} r={sr(i*6)*1.2+0.3} fill="#d8b4fe" opacity={sr(i*3)*0.4+0.1}/>)}
-      {/* Purple energy beams */}
-      <line x1="200" y1="0" x2="200" y2="200" stroke="#a855f7" strokeWidth="0.5" opacity="0.3"/>
     </svg>
   );
-  // Chapter 5 - Treasure room
   return (
     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -218,26 +180,14 @@ function SceneBackground({ id }: { id: number }) {
       </defs>
       <rect width="400" height="260" fill="url(#sg5)"/>
       <rect x="0" y="0" width="400" height="120" fill="url(#light5)"/>
-      {/* Golden pillars */}
       {[30,130,240,340].map((x,i)=>(
         <g key={i}>
           <rect x={x} y="30" width="22" height="200" fill="#92400e" rx="2"/>
           <rect x={x-4} y="25" width="30" height="14" fill="#b45309" rx="2"/>
-          <rect x={x-4} y="216" width="30" height="14" fill="#b45309" rx="2"/>
           <line x1={x+11} y1="30" x2={x+11} y2="230" stroke="#f59e0b" strokeWidth="1" opacity="0.4"/>
         </g>
       ))}
-      {/* Floating orbs */}
-      {[70,150,200,270,330].map((x,i)=>(
-        <ellipse key={i} cx={x} cy={60+i*10} rx={8+i*2} ry={8+i*2} fill="#f59e0b" opacity="0.25"/>
-      ))}
-      {/* Light beams from ceiling */}
-      {[80,160,200,240,320].map((x,i)=>(
-        <polygon key={i} points={`${x-5},0 ${x+5},0 ${x+30},260 ${x-30},260`} fill="#f59e0b" opacity={0.04+i*0.01}/>
-      ))}
-      {/* Floor reflection */}
       <rect x="0" y="200" width="400" height="60" fill="url(#floor5)"/>
-      {/* Treasure chests */}
       {[50,340].map(x=><g key={x}><rect x={x} y="215" width="30" height="22" fill="#92400e" rx="2"/><rect x={x} y="213" width="30" height="8" fill="#b45309" rx="2"/><rect x={x+12} y="220" width="6" height="6" fill="#f59e0b" rx="1"/></g>)}
       {Array.from({length:25},(_,i)=><circle key={i} cx={sr(i*4)*360+20} cy={sr(i*7)*200+10} r={sr(i*11)*2+0.5} fill="#fcd34d" opacity={sr(i*3)*0.6+0.1}/>)}
     </svg>
@@ -262,41 +212,25 @@ function Particles({ color }: { color: string }) {
 function PlayerCharacter({ accent, attacking = false }: { accent: string; attacking?: boolean }) {
   return (
     <svg width="72" height="120" viewBox="0 0 72 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Glow aura at feet */}
       <ellipse cx="36" cy="112" rx="22" ry="7" fill={accent} opacity="0.25"/>
-      {/* Cloak / Cape */}
       <path d="M20 55 Q14 80 16 110 Q36 105 56 110 Q58 80 52 55 Q44 62 36 60 Q28 62 20 55Z" fill="#1e293b"/>
-      <path d="M20 55 Q18 75 19 95" stroke="#334155" strokeWidth="1" opacity="0.5"/>
-      <path d="M52 55 Q54 75 53 95" stroke="#334155" strokeWidth="1" opacity="0.5"/>
-      {/* Body / Tunic */}
       <rect x="24" y="48" width="24" height="34" rx="5" fill="#334155"/>
-      {/* Belt */}
       <rect x="22" y="72" width="28" height="5" rx="2" fill="#475569"/>
       <rect x="33" y="71" width="6" height="7" rx="1" fill="#94a3b8"/>
-      {/* Left arm */}
       <rect x="13" y="50" width="13" height="8" rx="4" fill="#334155"/>
-      {/* Right arm - holding staff */}
       <rect x={attacking ? "50" : "46"} y="48" width="13" height="8" rx="4" fill="#334155"/>
-      {/* Neck */}
       <rect x="31" y="38" width="10" height="12" rx="4" fill="#475569"/>
-      {/* Head */}
       <circle cx="36" cy="28" r="16" fill="#475569"/>
-      {/* Hood */}
       <path d="M20 26 Q36 4 52 26 Q50 38 36 36 Q22 38 20 26Z" fill="#1e293b"/>
       <path d="M20 26 Q24 34 36 34 Q48 34 52 26" fill="#253348"/>
-      {/* Face shadow */}
       <ellipse cx="36" cy="28" rx="10" ry="9" fill="#1a2234" opacity="0.6"/>
-      {/* Glowing eyes */}
       <circle cx="31" cy="27" r="2.5" fill={accent} opacity="0.9"/>
       <circle cx="41" cy="27" r="2.5" fill={accent} opacity="0.9"/>
       <circle cx="31" cy="27" r="1.2" fill="white" opacity="0.7"/>
       <circle cx="41" cy="27" r="1.2" fill="white" opacity="0.7"/>
-      {/* Staff */}
       <rect x={attacking ? "56" : "54"} y="10" width="4" height="90" rx="2" fill="#64748b"/>
-      {/* Staff orb top */}
       <circle cx={attacking ? "58" : "56"} cy="10" r="7" fill={accent} opacity="0.9"/>
       <circle cx={attacking ? "58" : "56"} cy="10" r="4" fill="white" opacity="0.7"/>
-      {/* Staff glow */}
       <ellipse cx={attacking ? "58" : "56"} cy="10" rx="12" ry="12" fill={accent} opacity="0.2"/>
     </svg>
   );
@@ -317,9 +251,12 @@ function SlashEffect({ show }: { show: boolean }) {
   );
 }
 
-// ─── TYPEWRITER DIALOGUE BOX ──────────────────────────────────────────────────
-function DialogueBox({ text, accent, speakerName, onNext, isLast }: {
-  text: string; accent: string; speakerName: string; onNext: () => void; isLast: boolean;
+// ─── SPEECH BUBBLE ────────────────────────────────────────────────────────────
+function SpeechBubble({ text, accent, side, onNext }: {
+  text: string;
+  accent: string;
+  side: "left" | "right";
+  onNext: () => void;
 }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
@@ -332,41 +269,57 @@ function DialogueBox({ text, accent, speakerName, onNext, isLast }: {
       i++;
       setDisplayed(text.slice(0, i));
       if (i >= text.length) { clearInterval(ref.current!); setDone(true); }
-    }, 24);
+    }, 22);
     return () => clearInterval(ref.current!);
   }, [text]);
 
   const skip = () => { clearInterval(ref.current!); setDisplayed(text); setDone(true); };
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20">
-      {/* Speaker name plate */}
-      <div className="ml-4 mb-0 inline-block">
-        <div className="px-4 py-1.5 rounded-t-xl text-sm font-bold text-white" style={{ backgroundColor: accent }}>
-          {speakerName}
-        </div>
-      </div>
-      {/* Dialogue box */}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.82, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: -6 }}
+      transition={{ type: "spring", damping: 16, stiffness: 220 }}
+      className="relative cursor-pointer select-none"
+      style={{ maxWidth: 210 }}
+      onClick={() => { if (!done) skip(); else onNext(); }}
+    >
+      {/* Bubble body */}
       <div
-        className="mx-0 border-t-2 cursor-pointer select-none"
-        style={{ background: "rgba(5,5,15,0.92)", borderColor: accent + "80", backdropFilter: "blur(8px)" }}
-        onClick={!done ? skip : onNext}
+        className="rounded-2xl px-4 py-3"
+        style={{
+          background: "rgba(6, 8, 22, 0.92)",
+          border: `1.5px solid ${accent}70`,
+          backdropFilter: "blur(12px)",
+          boxShadow: `0 6px 28px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.06)`
+        }}
       >
-        <div className="px-5 py-4 min-h-[90px] flex flex-col justify-between">
-          <p className="text-sm leading-relaxed text-white/90 font-medium">
-            {displayed}
-            {!done && <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.55 }} className="ml-0.5 text-white/60">▌</motion.span>}
-          </p>
-          {done && (
-            <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1 }}
-              className="self-end text-xs font-semibold mt-2 flex items-center gap-1"
-              style={{ color: accent }}>
-              {isLast ? "⚔️ SAVAŞA GİR" : "DEVAM ▶"}
-            </motion.div>
+        <p className="text-sm font-medium text-white/90 leading-snug" style={{ minHeight: "3.5em" }}>
+          {displayed}
+          {!done && (
+            <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.5 }}
+              className="ml-0.5 text-white/40">▌</motion.span>
           )}
-        </div>
+        </p>
+        {done && (
+          <motion.p animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.1 }}
+            className="text-right text-[10px] font-bold mt-2" style={{ color: accent }}>
+            TAP ▶
+          </motion.p>
+        )}
       </div>
-    </div>
+      {/* Tail pointing down toward the character */}
+      <div style={{
+        position: "absolute",
+        bottom: -9,
+        [side === "left" ? "left" : "right"]: 24,
+        width: 0, height: 0,
+        borderLeft: "9px solid transparent",
+        borderRight: "9px solid transparent",
+        borderTop: `10px solid ${accent}70`,
+      }} />
+    </motion.div>
   );
 }
 
@@ -394,7 +347,7 @@ export default function StoryPage() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [showSlash, setShowSlash] = useState(false);
   const [enemyHit, setEnemyHit] = useState(false);
-  const [flash, setFlash] = useState<"green"|"red"|null>(null);
+  const [flash, setFlash] = useState<"green" | "red" | null>(null);
   const [mistakes, setMistakes] = useState(0);
   const [wordsUsed, setWordsUsed] = useState<string[]>([]);
   const [enemyDead, setEnemyDead] = useState(false);
@@ -403,6 +356,7 @@ export default function StoryPage() {
   const idxRef = useRef(0);
   const t0Ref = useRef(0);
   const chapter = CHAPTERS[chapterIdx];
+  const currentLine = chapter.dialogue[lineIdx];
 
   const startStory = () => {
     const w = useAppStore.getState().words;
@@ -415,8 +369,9 @@ export default function StoryPage() {
   const nextWord = () => { const w = poolRef.current[idxRef.current % poolRef.current.length]; idxRef.current++; return w; };
 
   const advanceLine = () => {
-    if (lineIdx < chapter.narrative.length - 1) { setLineIdx(l => l + 1); }
-    else {
+    if (lineIdx < chapter.dialogue.length - 1) {
+      setLineIdx(l => l + 1);
+    } else {
       setPhase("pre-challenge");
       setTimeout(() => {
         const word = nextWord();
@@ -448,8 +403,9 @@ export default function StoryPage() {
   };
 
   const advanceSuccess = () => {
-    if (successLine < chapter.successText.length - 1) { setSuccessLine(l => l + 1); }
-    else if (chapterIdx === CHAPTERS.length - 1) {
+    if (successLine < chapter.successDialogue.length - 1) {
+      setSuccessLine(l => l + 1);
+    } else if (chapterIdx === CHAPTERS.length - 1) {
       const dur = Math.round((Date.now() - t0Ref.current) / 1000);
       const score = Math.max(10, 100 - mistakes * 15);
       addGameSession({ gameType: "story", score, wordsPracticed: wordsUsed, playedAt: new Date().toISOString(), duration: dur });
@@ -472,9 +428,11 @@ export default function StoryPage() {
       ))}
       <motion.div initial={{scale:0,rotate:-10}} animate={{scale:1,rotate:0}} transition={{type:"spring",damping:10}} className="text-8xl">📜</motion.div>
       <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{delay:0.3}}>
-        <h1 className="text-3xl font-black mb-3 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Unutulan Kelimelerin Tapınağı</h1>
+        <h1 className="text-3xl font-black mb-3 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          Temple of Forgotten Words
+        </h1>
         <p className="text-[hsl(var(--muted-foreground))] max-w-sm mx-auto text-sm leading-relaxed">
-          5 bölümlük epik macera. Her bölümde farklı bir düşman. Kelime bilginle onları alt et.
+          A 5-chapter epic adventure. Face ancient guardians. Prove your vocabulary — or be silenced forever.
         </p>
         <div className="flex justify-center gap-4 mt-5">
           {CHAPTERS.map((c,i)=>(
@@ -488,7 +446,7 @@ export default function StoryPage() {
       <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.8}} className="flex flex-col gap-3 w-full max-w-xs">
         <button onClick={startStory} disabled={storeWords.length < 2}
           className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/30 active:scale-95 transition-all disabled:opacity-50">
-          {storeWords.length < 2 ? "En az 2 kelime gerekli" : "⚔️  Maceraya Başla"}
+          {storeWords.length < 2 ? "Add at least 2 words first" : "⚔️  Begin the Adventure"}
         </button>
         <Link href="/play" className="text-[hsl(var(--muted-foreground))] text-sm py-2">← Geri Dön</Link>
       </motion.div>
@@ -504,8 +462,8 @@ export default function StoryPage() {
         <Particles color="#f59e0b" />
         <motion.div animate={{rotate:[0,-5,5,0]}} transition={{repeat:2,duration:0.4,delay:0.3}} className="text-7xl">🏆</motion.div>
         <div>
-          <h2 className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">Efsane Tamamlandı!</h2>
-          <p className="text-[hsl(var(--muted-foreground))] mt-2 text-sm">Tapınağın tüm sırlarını çözdün. Kelimeler özgür!</p>
+          <h2 className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">Legend Complete!</h2>
+          <p className="text-[hsl(var(--muted-foreground))] mt-2 text-sm">You've freed all the words. The temple is yours.</p>
           <div className="flex justify-center gap-1 mt-3 text-3xl">
             {Array.from({length:3}).map((_,i)=>(
               <motion.span key={i} initial={{scale:0}} animate={{scale:1}} transition={{delay:0.3+i*0.2,type:"spring"}}>{i<stars?"⭐":"☆"}</motion.span>
@@ -513,12 +471,12 @@ export default function StoryPage() {
           </div>
         </div>
         <div className="flex gap-4">
-          <div className="bg-yellow-500 rounded-2xl px-6 py-4"><p className="text-3xl font-black text-white">{score}</p><p className="text-sm text-yellow-100">Puan</p></div>
-          <div className="bg-purple-600 rounded-2xl px-6 py-4"><p className="text-3xl font-black text-white">{wordsUsed.length}</p><p className="text-sm text-purple-100">Kelime</p></div>
+          <div className="bg-yellow-500 rounded-2xl px-6 py-4"><p className="text-3xl font-black text-white">{score}</p><p className="text-sm text-yellow-100">Score</p></div>
+          <div className="bg-purple-600 rounded-2xl px-6 py-4"><p className="text-3xl font-black text-white">{wordsUsed.length}</p><p className="text-sm text-purple-100">Words</p></div>
         </div>
         <div className="flex gap-3">
-          <button onClick={startStory} className="bg-[hsl(var(--secondary))] px-5 py-3 rounded-xl font-semibold text-sm">Tekrar Oyna</button>
-          <Link href="/play" className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-5 py-3 rounded-xl font-semibold text-sm">Oyunlar</Link>
+          <button onClick={startStory} className="bg-[hsl(var(--secondary))] px-5 py-3 rounded-xl font-semibold text-sm">Play Again</button>
+          <Link href="/play" className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-5 py-3 rounded-xl font-semibold text-sm">Games</Link>
         </div>
       </motion.div>
     );
@@ -568,46 +526,85 @@ export default function StoryPage() {
             className="relative z-10 flex flex-col items-center justify-center cursor-pointer"
             style={{height:"calc(100vh - 60px)"}}
             onClick={()=>{setLineIdx(0);setPhase("narrative");}}>
-            {/* Big bg number */}
             <motion.div initial={{scale:4,opacity:0}} animate={{scale:1,opacity:0.05}} transition={{duration:1}}
               className="absolute inset-0 flex items-center justify-center text-[200px] font-black select-none overflow-hidden">
               {chapterIdx+1}
             </motion.div>
-            {/* Enemy */}
             <motion.div initial={{y:50,scale:0.3,opacity:0}} animate={{y:0,scale:1,opacity:1}} transition={{type:"spring",delay:0.2,damping:10}}
               className="text-[100px] mb-6 relative" style={{filter:`drop-shadow(0 0 40px ${chapter.accent}90)`}}>
               {chapter.enemy.emoji}
             </motion.div>
             <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.5}} className="text-center">
               <p className="text-xs uppercase tracking-widest mb-1 font-medium" style={{color:chapter.accent}}>
-                Bölüm {chapterIdx+1} · {chapter.location}
+                Chapter {chapterIdx+1} · {chapter.location}
               </p>
               <h2 className="text-3xl font-black mb-1">{chapter.title}</h2>
               <p className="text-sm text-white/40">{chapter.enemy.subtitle}</p>
             </motion.div>
             <motion.p initial={{opacity:0}} animate={{opacity:[0,0.5,0]}} transition={{delay:1.4,repeat:Infinity,duration:1.6}}
-              className="text-white/30 text-xs absolute bottom-8">Devam etmek için dokun</motion.p>
+              className="text-white/30 text-xs absolute bottom-8">Tap to continue</motion.p>
           </motion.div>
         )}
 
-        {/* ── NARRATIVE (full screen scene + dialogue box) ── */}
+        {/* ── NARRATIVE (speech bubbles from characters) ── */}
         {phase==="narrative" && (
           <motion.div key={`n${chapterIdx}${lineIdx}`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
             className="relative z-10" style={{height:"calc(100vh - 60px)"}}>
 
-            {/* Player character — left side, facing right */}
-            <motion.div className="absolute bottom-[130px] left-[4%] flex flex-col items-center gap-1"
+            {/* Player speech bubble — left */}
+            <div className="absolute z-20" style={{bottom: 270, left: "3%"}}>
+              <AnimatePresence mode="wait">
+                {currentLine.speaker === "player" ? (
+                  <SpeechBubble
+                    key={`pb-${lineIdx}`}
+                    text={currentLine.text}
+                    accent={chapter.accent}
+                    side="left"
+                    onNext={advanceLine}
+                  />
+                ) : (
+                  <motion.div key="pd" initial={{opacity:0}} animate={{opacity:0.18}}
+                    className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs"
+                    style={{maxWidth:90}}>
+                    ...
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Enemy speech bubble — right */}
+            <div className="absolute z-20 flex justify-end" style={{bottom: 255, right: "3%"}}>
+              <AnimatePresence mode="wait">
+                {currentLine.speaker === "enemy" ? (
+                  <SpeechBubble
+                    key={`eb-${lineIdx}`}
+                    text={currentLine.text}
+                    accent={chapter.accent}
+                    side="right"
+                    onNext={advanceLine}
+                  />
+                ) : (
+                  <motion.div key="ed" initial={{opacity:0}} animate={{opacity:0.18}}
+                    className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs"
+                    style={{maxWidth:90}}>
+                    ...
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Player character — left */}
+            <motion.div className="absolute flex flex-col items-center gap-1" style={{bottom:130, left:"4%"}}
               animate={{y:[0,-4,0]}} transition={{repeat:Infinity,duration:3,ease:"easeInOut"}}>
               <PlayerCharacter accent={chapter.accent}/>
-              <span className="text-white/30 text-[10px] tracking-wider uppercase">Sen</span>
+              <span className="text-white/30 text-[10px] tracking-wider uppercase">You</span>
             </motion.div>
 
-            {/* VS divider glow */}
-            <div className="absolute bottom-[180px] left-1/2 -translate-x-1/2"
-              style={{width:2,height:80,background:`linear-gradient(to bottom,transparent,${chapter.accent}60,transparent)`}}/>
+            {/* VS glow divider */}
+            <div className="absolute left-1/2 -translate-x-1/2" style={{bottom:180,width:2,height:80,background:`linear-gradient(to bottom,transparent,${chapter.accent}60,transparent)`}}/>
 
-            {/* Enemy — right side, mirrored (facing left) */}
-            <motion.div className="absolute bottom-[120px] right-[4%] flex flex-col items-center gap-1"
+            {/* Enemy — right */}
+            <motion.div className="absolute flex flex-col items-center gap-1" style={{bottom:120, right:"4%"}}
               animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:2.6,ease:"easeInOut"}}>
               <div style={{transform:"scaleX(-1)", filter:`drop-shadow(0 0 20px ${chapter.accent}80)`}}>
                 <span className="text-[90px] block">{chapter.enemy.emoji}</span>
@@ -615,36 +612,35 @@ export default function StoryPage() {
               <span className="text-white/30 text-[10px] tracking-wider uppercase">{chapter.enemy.name}</span>
             </motion.div>
 
-            {/* JRPG Dialogue box at bottom */}
-            <DialogueBox
-              text={chapter.narrative[lineIdx]}
-              accent={chapter.accent}
-              speakerName={chapter.enemy.name}
-              onNext={advanceLine}
-              isLast={lineIdx===chapter.narrative.length-1}
-            />
+            {/* Speaker name indicator at bottom */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+              <motion.div
+                key={currentLine.speaker}
+                initial={{opacity:0, y:4}} animate={{opacity:1, y:0}}
+                className="px-3 py-1 rounded-full text-xs font-semibold"
+                style={{background:`${chapter.accent}30`, border:`1px solid ${chapter.accent}50`, color:chapter.accent}}>
+                {currentLine.speaker === "player" ? "You" : chapter.enemy.name} is speaking
+              </motion.div>
+            </div>
           </motion.div>
         )}
 
         {/* ── PRE-CHALLENGE ── */}
         {phase==="pre-challenge" && (
           <motion.div key="pre" className="relative z-10 flex flex-col items-center justify-center" style={{height:"calc(100vh - 60px)"}}>
-            {/* Player left, enemy right */}
-            <div className="absolute bottom-[160px] left-[8%] flex flex-col items-center gap-1">
-              <motion.div animate={{x:[0,-5,0]}} transition={{repeat:Infinity,duration:0.7,ease:"easeInOut"}}>
+            <div className="absolute" style={{bottom:160, left:"8%"}}>
+              <motion.div animate={{x:[0,-5,0]}} transition={{repeat:Infinity,duration:0.7}}>
                 <PlayerCharacter accent={chapter.accent}/>
               </motion.div>
-              <span className="text-white/30 text-[10px] tracking-wider uppercase">Sen</span>
+              <span className="text-white/30 text-[10px] tracking-wider uppercase block text-center mt-1">You</span>
             </div>
 
-            {/* Charging enemy */}
             <div className="relative flex flex-col items-center">
               <motion.div
                 animate={{scale:[1,1.12,1,1.2,1],filter:[`brightness(1)`,`brightness(2.5) drop-shadow(0 0 35px ${chapter.accent})`,`brightness(1)`,`brightness(3) drop-shadow(0 0 55px ${chapter.accent})`,`brightness(1)`]}}
                 transition={{duration:2,ease:"easeInOut"}} className="text-[90px]">
                 {chapter.enemy.emoji}
               </motion.div>
-              {/* Charging ring particles */}
               {[...Array(8)].map((_,i)=>(
                 <motion.div key={i} className="absolute rounded-full" style={{width:8,height:8,backgroundColor:chapter.accent}}
                   initial={{x:0,y:0,opacity:0,scale:0}}
@@ -654,7 +650,7 @@ export default function StoryPage() {
             </div>
             <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.4}}
               className="text-base font-bold tracking-wide mt-6" style={{color:chapter.accent}}>
-              ⚡ {chapter.enemy.name} saldırıya hazırlanıyor...
+              ⚡ {chapter.enemy.name} is charging up...
             </motion.p>
           </motion.div>
         )}
@@ -663,18 +659,17 @@ export default function StoryPage() {
         {phase==="challenge" && challenge && (
           <motion.div key="ch" initial={{opacity:0}} animate={{opacity:1}} className="relative z-10 flex flex-col" style={{height:"calc(100vh - 60px)"}}>
 
-            {/* ── Battle arena: player left, enemy right ── */}
-            <div className="flex items-end justify-between px-6 pt-3 pb-1">
+            {/* Battle arena */}
+            <div className="flex items-end justify-between px-4 pt-3 pb-1">
 
               {/* Player side */}
               <div className="flex flex-col items-center gap-1">
                 <motion.div
-                  animate={answered && isCorrect ? {x:[0,12,0],rotate:[0,-8,0]} : {y:[0,-3,0]}}
+                  animate={answered && isCorrect ? {x:[0,14,0],rotate:[0,-8,0]} : {y:[0,-3,0]}}
                   transition={answered && isCorrect ? {duration:0.35} : {repeat:Infinity,duration:2.8,ease:"easeInOut"}}>
                   <PlayerCharacter accent={chapter.accent} attacking={answered && isCorrect}/>
                 </motion.div>
-                <span className="text-white/30 text-[10px] tracking-wider uppercase">Sen</span>
-                {/* Player HP — always full (narrative hero) */}
+                <span className="text-white/30 text-[10px] tracking-wider uppercase">You</span>
                 <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-emerald-400 w-full"/>
                 </div>
@@ -682,37 +677,37 @@ export default function StoryPage() {
 
               {/* VS */}
               <div className="flex flex-col items-center pb-8 gap-2">
-                <motion.span className="text-xs font-black tracking-widest"
-                  style={{color:chapter.accent}}
-                  animate={{opacity:[0.4,1,0.4]}} transition={{repeat:Infinity,duration:1.4}}>
-                  VS
-                </motion.span>
-                {/* Vertical glow */}
+                <motion.span className="text-xs font-black tracking-widest" style={{color:chapter.accent}}
+                  animate={{opacity:[0.4,1,0.4]}} transition={{repeat:Infinity,duration:1.4}}>VS</motion.span>
                 <div style={{width:1,height:40,background:`linear-gradient(to bottom,transparent,${chapter.accent}50,transparent)`}}/>
               </div>
 
               {/* Enemy side */}
               <div className="flex flex-col items-center gap-1">
+                {/* Enemy speech bubble */}
+                <div className="mb-2 relative" style={{maxWidth:180}}>
+                  <div className="rounded-2xl px-3 py-2 text-xs font-medium text-white/90"
+                    style={{background:"rgba(6,8,22,0.90)", border:`1.5px solid ${chapter.accent}65`, backdropFilter:"blur(10px)"}}>
+                    {chapter.challengeText}
+                  </div>
+                  <div style={{position:"absolute",bottom:-7,right:20,width:0,height:0,
+                    borderLeft:"7px solid transparent",borderRight:"7px solid transparent",
+                    borderTop:`8px solid ${chapter.accent}65`}}/>
+                </div>
                 <div className="relative">
                   <motion.div
                     animate={enemyHit ? {x:[-16,16,-10,10,0],scale:[1,0.82,1]} : {y:[0,-6,0]}}
                     transition={enemyHit ? {duration:0.4} : {repeat:Infinity,duration:2,ease:"easeInOut"}}
                     className="text-[72px]"
-                    style={{
-                      transform:"scaleX(-1)",
-                      filter: answered && isCorrect
-                        ? "grayscale(1) brightness(0.15)"
-                        : `drop-shadow(0 0 22px ${chapter.accent}90)`
-                    }}>
+                    style={{transform:"scaleX(-1)",filter:answered&&isCorrect?"grayscale(1) brightness(0.15)":`drop-shadow(0 0 22px ${chapter.accent}90)`}}>
                     {chapter.enemy.emoji}
                   </motion.div>
                   <SlashEffect show={showSlash}/>
                 </div>
                 <span className="text-white/30 text-[10px] tracking-wider uppercase">{chapter.enemy.name}</span>
-                {/* Enemy HP bar */}
                 <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
                   <motion.div className="h-full rounded-full" style={{backgroundColor:chapter.accent}}
-                    animate={{width: answered && isCorrect ? "0%" : "100%"}} transition={{duration:0.75}}/>
+                    animate={{width:answered&&isCorrect?"0%":"100%"}} transition={{duration:0.75}}/>
                 </div>
               </div>
             </div>
@@ -722,7 +717,7 @@ export default function StoryPage() {
               <motion.div initial={{scale:0.88,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring"}}
                 className="rounded-2xl border p-4"
                 style={{borderColor:chapter.accent+"45",background:`linear-gradient(135deg,${chapter.accent}18,${chapter.accent}08)`,boxShadow:`0 0 28px ${chapter.accent}25`}}>
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">{chapter.challengeText}</p>
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">What does this mean?</p>
                 <p className="text-4xl font-black text-center py-1" style={{textShadow:`0 0 24px ${chapter.accent}`}}>
                   {challenge.word.word}
                 </p>
@@ -751,19 +746,20 @@ export default function StoryPage() {
               </div>
               {answered&&!isCorrect&&(
                 <motion.p initial={{opacity:0}} animate={{opacity:1}} className="text-center text-white/40 text-sm">
-                  Doğru: <span className="text-green-400 font-semibold">{challenge.word.translation}</span>
+                  Correct: <span className="text-green-400 font-semibold">{challenge.word.translation}</span>
                 </motion.p>
               )}
             </div>
           </motion.div>
         )}
 
-        {/* ── CHAPTER SUCCESS ── */}
+        {/* ── CHAPTER SUCCESS (speech bubbles) ── */}
         {phase==="chapter-success" && (
           <motion.div key={`s${chapterIdx}${successLine}`} initial={{opacity:0}} animate={{opacity:1}}
             className="relative z-10" style={{height:"calc(100vh - 60px)"}}>
-            {/* Defeated enemy */}
-            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 flex flex-col items-center">
+
+            {/* Defeated/alive enemy at top center */}
+            <div className="absolute flex flex-col items-center" style={{top:"8%", left:"50%", transform:"translateX(-50%)"}}>
               {enemyDead ? (
                 <motion.div initial={{scale:1,rotate:0,opacity:1}}
                   animate={{scale:[1,0.5,0],rotate:[0,-20,180],opacity:[1,0.5,0]}} transition={{duration:1.2}}>
@@ -778,21 +774,57 @@ export default function StoryPage() {
                 </motion.div>
               )}
             </div>
-            {/* Success dialogue */}
-            <div className="absolute bottom-0 left-0 right-0">
-              <div className="ml-4 mb-0 inline-block">
-                <div className="px-4 py-1.5 rounded-t-xl text-sm font-bold text-white bg-emerald-600">Anlatıcı</div>
-              </div>
-              <div className="border-t-2 border-emerald-500/50 cursor-pointer" style={{background:"rgba(5,5,15,0.92)",backdropFilter:"blur(8px)"}}
-                onClick={advanceSuccess}>
-                <div className="px-5 py-4 min-h-[90px] flex flex-col justify-between">
-                  <p className="text-sm leading-relaxed text-white/90 font-medium italic">{chapter.successText[successLine]}</p>
-                  <motion.div animate={{opacity:[0.4,1,0.4]}} transition={{repeat:Infinity,duration:1}}
-                    className="self-end text-xs font-semibold mt-2 text-emerald-400">
-                    {successLine < chapter.successText.length-1 ? "DEVAM ▶" : chapterIdx===CHAPTERS.length-1 ? "ZAFERİ TOPLA 🏆" : `BÖLÜM ${chapterIdx+2} →`}
-                  </motion.div>
-                </div>
-              </div>
+
+            {/* Success speech bubbles */}
+            {(() => {
+              const line = chapter.successDialogue[successLine];
+              return (
+                <>
+                  {/* Player bubble — left */}
+                  <div className="absolute z-20" style={{bottom:270, left:"3%"}}>
+                    <AnimatePresence mode="wait">
+                      {line.speaker === "player" ? (
+                        <SpeechBubble key={`sp-${successLine}`} text={line.text} accent="#22c55e" side="left" onNext={advanceSuccess}/>
+                      ) : (
+                        <motion.div key="spd" initial={{opacity:0}} animate={{opacity:0.18}}
+                          className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs" style={{maxWidth:90}}>
+                          ...
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Enemy bubble — right */}
+                  <div className="absolute z-20 flex justify-end" style={{bottom:255, right:"3%"}}>
+                    <AnimatePresence mode="wait">
+                      {line.speaker === "enemy" ? (
+                        <SpeechBubble key={`se-${successLine}`} text={line.text} accent="#22c55e" side="right" onNext={advanceSuccess}/>
+                      ) : (
+                        <motion.div key="sed" initial={{opacity:0}} animate={{opacity:0.18}}
+                          className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs" style={{maxWidth:90}}>
+                          ...
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Player character */}
+            <motion.div className="absolute flex flex-col items-center gap-1" style={{bottom:130, left:"4%"}}
+              animate={{y:[0,-4,0]}} transition={{repeat:Infinity,duration:3,ease:"easeInOut"}}>
+              <PlayerCharacter accent="#22c55e"/>
+              <span className="text-white/30 text-[10px] tracking-wider uppercase">You</span>
+            </motion.div>
+
+            {/* Advance hint */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+              <motion.div animate={{opacity:[0.3,0.7,0.3]}} transition={{repeat:Infinity,duration:1.5}}
+                className="text-xs text-emerald-400/60">
+                {successLine < chapter.successDialogue.length-1 ? "tap to continue" :
+                  chapterIdx===CHAPTERS.length-1 ? "collect your victory →" : `chapter ${chapterIdx+2} →`}
+              </motion.div>
             </div>
           </motion.div>
         )}
