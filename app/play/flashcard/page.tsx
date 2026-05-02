@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   RotateCcw, ChevronLeft, Volume2, ThumbsUp, ThumbsDown, Meh,
-  Trophy, Star, Zap,
+  Trophy, Star, Zap, ChevronDown, ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
@@ -27,6 +27,7 @@ export default function FlashcardPage() {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [startTime] = useState(Date.now());
+  const [showAllExamples, setShowAllExamples] = useState(false);
 
   // Kartları hazırla
   useEffect(() => {
@@ -95,6 +96,7 @@ export default function FlashcardPage() {
     } else {
       setIndex((prev) => prev + 1);
       setFlipped(false);
+      setShowAllExamples(false);
     }
   }, [current, isLast, xpGained, queue, startTime, reviewWord, addGameSession]);
 
@@ -232,6 +234,41 @@ export default function FlashcardPage() {
           </div>
         </div>
       </div>
+
+      {/* Diğer örnek cümleler — flip sonrası */}
+      {flipped && current.examples.length > 1 && (
+        <div className="mb-4 rounded-xl border border-[hsl(var(--border))] overflow-hidden">
+          <button
+            onClick={() => setShowAllExamples(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-[hsl(var(--secondary))] text-sm font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
+          >
+            <span>📚 Örnek Cümleler</span>
+            <div className="flex items-center gap-1 text-brand-500 text-xs font-semibold">
+              {showAllExamples ? (
+                <><ChevronUp className="w-3.5 h-3.5" /> Gizle</>
+              ) : (
+                <><ChevronDown className="w-3.5 h-3.5" /> +{current.examples.length - 1} cümle daha</>
+              )}
+            </div>
+          </button>
+          {showAllExamples && (
+            <div className="divide-y divide-[hsl(var(--border))]">
+              {current.examples.map((ex, i) => (
+                <div key={i} className={cn(
+                  "px-4 py-3",
+                  i === 0 ? "bg-brand-50 dark:bg-brand-950/20" : "bg-[hsl(var(--card))]"
+                )}>
+                  {i === 0 && (
+                    <span className="text-[10px] font-bold text-brand-500 uppercase tracking-wider block mb-1">Kart Cümlesi</span>
+                  )}
+                  <p className="text-sm italic text-[hsl(var(--foreground))]">&ldquo;{ex.en}&rdquo;</p>
+                  <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">{ex.tr}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Rating Buttons — sadece flip sonrası göster */}
       {flipped && (
