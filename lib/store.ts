@@ -13,6 +13,7 @@ import {
 import { generateId } from "./utils";
 
 interface AppState {
+  _hasHydrated: boolean;
   isAuthenticated: boolean;
   words: Word[];
   reviews: Record<string, Review>; // wordId -> Review
@@ -21,6 +22,7 @@ interface AppState {
   stats: UserStats;
 
   // Actions
+  setHasHydrated: (state: boolean) => void;
   login: (phone: string) => boolean;
   logout: () => void;
   addWord: (word: Omit<Word, "id" | "createdAt" | "status">) => Word;
@@ -50,12 +52,15 @@ const ALLOWED_PHONE = "5457827477";
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
+      _hasHydrated: false,
       isAuthenticated: false,
       words: [],
       reviews: {},
       gameSessions: [],
       achievements: [],
       stats: defaultStats,
+
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
 
       login: (phone) => {
         const cleaned = phone.replace(/\s/g, "");
@@ -227,6 +232,9 @@ export const useAppStore = create<AppState>()(
     {
       name: "wordcraft-storage",
       version: 1,
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
