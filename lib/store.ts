@@ -157,6 +157,10 @@ export const useAppStore = create<AppState>()(
             const localOnlyWords = localWords.filter(
               (w) => !cloudWordMap.has(w.id) && !deletedIds.has(w.id)
             );
+
+            // mergedReviews ÖNCE tanımlanmalı (mergedWords bunu kullanıyor)
+            const mergedReviews = { ...localReviews, ...cloudData.reviews };
+
             // Word statüslerini merge edilmiş review'lardan yeniden hesapla
             // (cloud'da eski/yanlış status olabilir — review interval'i tek gerçek kaynaktır)
             const mergedWords = [...filteredCloudWords, ...localOnlyWords].map((w) => {
@@ -164,8 +168,6 @@ export const useAppStore = create<AppState>()(
               if (rev) return { ...w, status: getWordStatusFromInterval(rev.interval) };
               return w;
             });
-
-            const mergedReviews = { ...localReviews, ...cloudData.reviews };
 
             // Başarımları birleştir
             const cloudBadgeIds = new Set(cloudData.achievements.map((a) => a.badgeId));
