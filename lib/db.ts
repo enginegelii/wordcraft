@@ -223,7 +223,8 @@ export async function pushLocalDataToCloud(
   if (!isSupabaseConfigured || !supabase) return;
 
   try {
-    const ops: Promise<unknown>[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ops: any[] = [];
 
     if (words.length > 0) {
       ops.push(supabase.from("words").upsert(words.map(wordToRow)));
