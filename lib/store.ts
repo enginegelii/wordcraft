@@ -214,11 +214,11 @@ export const useAppStore = create<AppState>()(
             if (localOnlyWords.length > 0) {
               console.log(`[sync] Pushing ${localOnlyWords.length} local-only words to cloud...`);
               await pushLocalDataToCloud(mergedWords, mergedReviews, mergedStats, get().gameSessions, mergedAchievements, mergedGrammar);
-            } else if (mergedStats.xp > (cloudData.stats?.xp ?? 0)) {
-              // Kelime farkı olmasa bile XP daha yüksekse stats'ı cloud'a yaz
-              console.log(`[sync] Local XP (${mergedStats.xp}) > cloud XP (${cloudData.stats?.xp ?? 0}), updating stats in cloud...`);
-              upsertStats(mergedStats, mergedGrammar);
             }
+
+            // Her sync'te stats'ı cloud'a yaz — user_stats satırı yoksa oluşturur,
+            // varsa en güncel değerle günceller (XP cihazlar arası tutarlılığı garanti eder)
+            upsertStats(mergedStats, mergedGrammar).catch(() => {/* offline */});
 
             // Eğer local'de grammar level var ama cloud'da yoksa → cloud'a yaz
             // (Kullanıcı sync özelliğinden önce placement test yapmış olabilir)
