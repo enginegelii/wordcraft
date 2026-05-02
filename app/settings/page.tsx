@@ -3,8 +3,9 @@
 import { useState } from "react";
 import {
   Target, Moon, Sun, Trash2, Download, Trophy,
-  ChevronRight, Check, LogOut,
+  ChevronRight, Check, LogOut, RefreshCw, Wifi, WifiOff,
 } from "lucide-react";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { useTheme } from "next-themes";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -19,8 +20,18 @@ export default function SettingsPage() {
   const updateStats = useAppStore((s) => s.updateStats);
   const words = useAppStore((s) => s.words);
   const logout = useAppStore((s) => s.logout);
+  const syncFromCloud = useAppStore((s) => s.syncFromCloud);
+  const isSyncing = useAppStore((s) => s.isSyncing);
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const handleSync = async () => {
+    setSyncMessage(null);
+    await syncFromCloud();
+    setSyncMessage("Senkron tamamlandi!");
+    setTimeout(() => setSyncMessage(null), 3000);
+  };
 
   const exportData = () => {
     const data = {
@@ -210,6 +221,49 @@ export default function SettingsPage() {
       </Section>
 
       {/* Çıkış */}
+      {/* Senkron & Baglanti */}
+      <Section title="Bulut Senkron">
+        <div className="p-4 space-y-3">
+          {/* Supabase baglanti durumu */}
+          <div className="flex items-center gap-3">
+            {isSupabaseConfigured ? (
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <Wifi className="w-5 h-5" />
+                <span className="text-sm font-medium">Supabase baglantisi aktif</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-red-500">
+                <WifiOff className="w-5 h-5" />
+                <div>
+                  <p className="text-sm font-medium">Supabase baglanamadi</p>
+                  <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+                    Vercel'e NEXT_PUBLIC_SUPABASE_URL ve NEXT_PUBLIC_SUPABASE_ANON_KEY ekle
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Manuel sync butonu */}
+          {isSupabaseConfigured && (
+            <button
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="flex items-center gap-2 bg-[hsl(var(--secondary))] hover:bg-[hsl(var(--secondary))]/80 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={cn("w-4 h-4", isSyncing && "animate-spin")} />
+              {isSyncing ? "Senkron ediliyor..." : "Simdi Senkron Et"}
+            </button>
+          )}
+
+          {syncMessage && (
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
+              <Check className="w-4 h-4" /> {syncMessage}
+            </p>
+          )}
+        </div>
+      </Section>
+
       <Section title="Hesap">
         <div className="p-4">
           <button
