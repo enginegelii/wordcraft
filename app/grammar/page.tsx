@@ -22,7 +22,7 @@ export default function GrammarPage() {
   const [showLevelPicker, setShowLevelPicker] = useState(false);
 
   // Tamamlanan konu sayısı
-  const completedCount = Object.values(grammar.topicProgress).filter(
+  const completedCount = Object.values(grammar.topicProgress ?? {}).filter(
     (p) => p.quizCompleted
   ).length;
 

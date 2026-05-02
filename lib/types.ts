@@ -84,6 +84,19 @@ export function getXPForNextLevel(level: number): number {
   return LEVEL_THRESHOLDS[level] ?? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
 }
 
+
+// ─── BADGES ──────────────────────────────────────────────────────────────────
+
+export const BADGES = {
+  FIRST_WORD:  { id: "first_word",  icon: "🌱", name: "İlk Kelime",   desc: "İlk kelimeni ekledin!" },
+  WORDS_10:    { id: "words_10",    icon: "📚", name: "10 Kelime",     desc: "10 kelime ekledin!" },
+  WORDS_50:    { id: "words_50",    icon: "🎓", name: "50 Kelime",     desc: "50 kelime ekledin!" },
+  WORDS_100:   { id: "words_100",   icon: "🏆", name: "100 Kelime",    desc: "100 kelime ekledin!" },
+  STREAK_3:    { id: "streak_3",    icon: "🔥", name: "3 Gün",         desc: "3 günlük seri!" },
+  STREAK_7:    { id: "streak_7",    icon: "⚡", name: "1 Hafta",       desc: "7 günlük seri!" },
+  STREAK_30:   { id: "streak_30",   icon: "💎", name: "1 Ay",          desc: "30 günlük seri!" },
+};
+
 // ─── GRAMMAR TYPES ────────────────────────────────────────────────────────────
 
 export type GrammarLevel = "intermediate" | "upper-intermediate" | "advanced" | "advanced-plus";

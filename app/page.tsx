@@ -39,7 +39,7 @@ export default function Dashboard() {
   // Gramer seviyesi hesaplamaları
   const grammarLevel = grammar.level;
   const grammarXP = grammar.grammarXP ?? 0;
-  const completedTopics = Object.values(grammar.topicProgress).filter((p) => p.quizCompleted).length;
+  const completedTopics = Object.values(grammar.topicProgress ?? {}).filter((p) => p.quizCompleted).length;
   const totalTopics = GRAMMAR_TOPICS.length;
   const grammarLevelInfo = grammarLevel ? LEVEL_DISPLAY[grammarLevel] : null;
   const grammarLevelIdx = grammarLevel ? GRAMMAR_LEVEL_ORDER.indexOf(grammarLevel) : -1;

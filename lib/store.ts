@@ -435,7 +435,18 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "wordcraft-storage",
-      version: 1,
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        const state = persistedState as any;
+        // v1 → v2: grammar alanlarını güvenli hale getir
+        if (!state.grammar) {
+          state.grammar = { level: null, placementDone: false, topicProgress: {}, grammarXP: 0 };
+        } else {
+          if (!state.grammar.topicProgress) state.grammar.topicProgress = {};
+          if (state.grammar.grammarXP === undefined) state.grammar.grammarXP = 0;
+        }
+        return state;
+      },
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         words: state.words,
