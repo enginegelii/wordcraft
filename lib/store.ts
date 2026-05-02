@@ -23,6 +23,8 @@ import {
   upsertStats,
   upsertGameSession,
   upsertAchievement,
+  upsertGrammarProgress,
+  upsertGrammarMeta,
 } from "./db";
 
 interface AppState {
@@ -131,7 +133,8 @@ export const useAppStore = create<AppState>()(
               localReviews,
               get().stats,
               get().gameSessions,
-              get().achievements
+              get().achievements,
+              get().grammar
             );
             set({ isSyncing: false });
             return;
@@ -154,19 +157,42 @@ export const useAppStore = create<AppState>()(
             const cloudStats = cloudData.stats ?? get().stats;
             const mergedStats = cloudStats.xp >= get().stats.xp ? cloudStats : get().stats;
 
+            // Grammar: cloud ve local'i birleştir
+            const localGrammar = get().grammar;
+            const cloudGrammarMeta = cloudData.grammarMeta;
+            const cloudTopicProgress = cloudData.topicProgress ?? {};
+            const mergedTopicProgress = { ...localGrammar.topicProgress, ...cloudTopicProgress };
+
+            // Daha yüksek grammarXP'yi tut
+            const cloudGrammarXP = cloudGrammarMeta?.grammarXP ?? 0;
+            const localGrammarXP = localGrammar.grammarXP ?? 0;
+            const mergedGrammarXP = Math.max(cloudGrammarXP, localGrammarXP);
+
+            // Level: cloud'dan geldiyse kullan (null değilse), yoksa local'i koru
+            const mergedGrammarLevel = cloudGrammarMeta?.level ?? localGrammar.level;
+            const mergedPlacementDone = (cloudGrammarMeta?.placementDone ?? false) || localGrammar.placementDone;
+
+            const mergedGrammar = {
+              level: mergedGrammarLevel,
+              placementDone: mergedPlacementDone,
+              grammarXP: mergedGrammarXP,
+              topicProgress: mergedTopicProgress,
+            };
+
             set({
               words: mergedWords,
               reviews: mergedReviews,
               stats: mergedStats,
               achievements: mergedAchievements,
               gameSessions: cloudData.gameSessions,
+              grammar: mergedGrammar,
               isSyncing: false,
             });
 
             // Lokalde fazladan kelimeler varsa cloud'a da yaz
             if (localOnlyWords.length > 0) {
               console.log(`[sync] Pushing ${localOnlyWords.length} local-only words to cloud...`);
-              await pushLocalDataToCloud(mergedWords, mergedReviews, mergedStats, get().gameSessions, mergedAchievements);
+              await pushLocalDataToCloud(mergedWords, mergedReviews, mergedStats, get().gameSessions, mergedAchievements, mergedGrammar);
             }
 
             console.log(`[sync] Merged: ${mergedWords.length} words total`);
@@ -328,6 +354,7 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           grammar: { ...state.grammar, level, placementDone: true },
         }));
+        upsertGrammarMeta(get().grammar, get().stats);
       },
 
       markTopicStudied: (topicId) => {
@@ -348,6 +375,9 @@ export const useAppStore = create<AppState>()(
             },
           };
         });
+        const updatedProgress = get().grammar.topicProgress[topicId];
+        if (updatedProgress) upsertGrammarProgress(updatedProgress);
+        upsertGrammarMeta(get().grammar, get().stats);
         get().addXP(10);
       },
 
@@ -380,6 +410,10 @@ export const useAppStore = create<AppState>()(
         const grammarXPGain = score >= 70 ? 50 : score >= 50 ? 30 : 15;
         get().addGrammarXP(grammarXPGain);
         get().checkAndUpdateStreak();
+        // Cloud'a kaydet
+        const completedProgress = get().grammar.topicProgress[topicId];
+        if (completedProgress) upsertGrammarProgress(completedProgress);
+        upsertGrammarMeta(get().grammar, get().stats);
       },
 
       getTopicProgress: (topicId) => {

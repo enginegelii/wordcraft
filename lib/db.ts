@@ -4,7 +4,7 @@
  */
 
 import { supabase, isSupabaseConfigured } from "./supabase";
-import type { Word, Review, UserStats, GameSession, Achievement } from "./types";
+import type { Word, Review, UserStats, GameSession, Achievement, GrammarState, GrammarTopicProgress } from "./types";
 
 // ─── Row → TypeScript mappers ────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ function rowToStats(row: Record<string, unknown>): UserStats {
   };
 }
 
-function statsToRow(stats: UserStats) {
+function statsToRow(stats: UserStats, grammar?: GrammarState) {
   return {
     id: 1,
     streak_count: stats.streakCount,
@@ -92,6 +92,32 @@ function statsToRow(stats: UserStats) {
     total_words_added: stats.totalWordsAdded,
     total_reviews: stats.totalReviews,
     daily_goal: stats.dailyGoal,
+    // Grammar meta (optional — only written when grammar state is provided)
+    ...(grammar !== undefined ? {
+      grammar_level: grammar.level ?? null,
+      grammar_xp: grammar.grammarXP ?? 0,
+      grammar_placement_done: grammar.placementDone ?? false,
+    } : {}),
+  };
+}
+
+function rowToGrammarMeta(row: Record<string, unknown>): Pick<GrammarState, "level" | "grammarXP" | "placementDone"> {
+  return {
+    level: (row.grammar_level as GrammarState["level"]) ?? null,
+    grammarXP: (row.grammar_xp as number) ?? 0,
+    placementDone: (row.grammar_placement_done as boolean) ?? false,
+  };
+}
+
+function grammarProgressToRow(p: GrammarTopicProgress) {
+  return {
+    id: `topic_${p.topicId}`,
+    topic_id: p.topicId,
+    studied: p.studied,
+    quiz_completed: p.quizCompleted,
+    quiz_score: p.quizScore,
+    completed_at: p.completedAt ?? null,
+    updated_at: new Date().toISOString(),
   };
 }
 
@@ -101,7 +127,7 @@ export async function fetchAllData() {
   if (!isSupabaseConfigured || !supabase) return null;
 
   try {
-    const [wordsRes, reviewsRes, statsRes, achievementsRes, sessionsRes] =
+    const [wordsRes, reviewsRes, statsRes, achievementsRes, sessionsRes, grammarProgressRes] =
       await Promise.all([
         supabase.from("words").select("*").order("created_at", { ascending: false }),
         supabase.from("reviews").select("*"),
@@ -112,6 +138,7 @@ export async function fetchAllData() {
           .select("*")
           .order("played_at", { ascending: false })
           .limit(100),
+        supabase.from("grammar_progress").select("*"),
       ]);
 
     const words: Word[] = (wordsRes.data ?? []).map(rowToWord);
@@ -125,6 +152,22 @@ export async function fetchAllData() {
     const stats: UserStats | null = statsRes.data
       ? rowToStats(statsRes.data)
       : null;
+
+    // Grammar meta (level, xp, placement) from user_stats row
+    const grammarMeta = statsRes.data ? rowToGrammarMeta(statsRes.data) : null;
+
+    // Grammar topic progress from grammar_progress table
+    const topicProgress: Record<string, GrammarTopicProgress> = {};
+    (grammarProgressRes.data ?? []).forEach((row) => {
+      const tp: GrammarTopicProgress = {
+        topicId: row.topic_id as string,
+        studied: row.studied as boolean,
+        quizCompleted: row.quiz_completed as boolean,
+        quizScore: row.quiz_score as number,
+        completedAt: row.completed_at as string | undefined,
+      };
+      topicProgress[tp.topicId] = tp;
+    });
 
     const achievements: Achievement[] = (achievementsRes.data ?? []).map(
       (row) => ({
@@ -143,7 +186,7 @@ export async function fetchAllData() {
       duration: (row.duration as number) ?? 0,
     }));
 
-    return { words, reviews, stats, achievements, gameSessions };
+    return { words, reviews, stats, grammarMeta, topicProgress, achievements, gameSessions };
   } catch (e) {
     console.error("[db] fetchAllData error:", e);
     return null;
@@ -182,10 +225,24 @@ export async function upsertReview(review: Review) {
   if (error) console.error("[db] upsertReview error:", error.message);
 }
 
-export async function upsertStats(stats: UserStats) {
+export async function upsertStats(stats: UserStats, grammar?: GrammarState) {
   if (!isSupabaseConfigured || !supabase) return;
-  const { error } = await supabase.from("user_stats").upsert(statsToRow(stats));
+  const { error } = await supabase.from("user_stats").upsert(statsToRow(stats, grammar));
   if (error) console.error("[db] upsertStats error:", error.message);
+}
+
+export async function upsertGrammarProgress(progress: GrammarTopicProgress) {
+  if (!isSupabaseConfigured || !supabase) return;
+  const { error } = await supabase
+    .from("grammar_progress")
+    .upsert(grammarProgressToRow(progress), { onConflict: "id" });
+  if (error) console.error("[db] upsertGrammarProgress error:", error.message);
+}
+
+export async function upsertGrammarMeta(grammar: GrammarState, stats: UserStats) {
+  if (!isSupabaseConfigured || !supabase) return;
+  const { error } = await supabase.from("user_stats").upsert(statsToRow(stats, grammar));
+  if (error) console.error("[db] upsertGrammarMeta error:", error.message);
 }
 
 export async function upsertGameSession(session: GameSession) {
@@ -218,13 +275,14 @@ export async function pushLocalDataToCloud(
   reviews: Record<string, Review>,
   stats: UserStats,
   gameSessions: GameSession[],
-  achievements: Achievement[]
+  achievements: Achievement[],
+  grammar?: GrammarState
 ) {
   if (!isSupabaseConfigured || !supabase) return;
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ops: any[] = [];
+    const ops: any[] = [];
 
     if (words.length > 0) {
       ops.push(supabase.from("words").upsert(words.map(wordToRow)));
@@ -235,7 +293,7 @@ export async function pushLocalDataToCloud(
       ops.push(supabase.from("reviews").upsert(reviewList.map(reviewToRow)));
     }
 
-    ops.push(supabase.from("user_stats").upsert(statsToRow(stats)));
+    ops.push(supabase.from("user_stats").upsert(statsToRow(stats, grammar)));
 
     if (gameSessions.length > 0) {
       ops.push(
@@ -262,6 +320,14 @@ export async function pushLocalDataToCloud(
           }))
         )
       );
+    }
+
+    // Grammar topic progress
+    if (grammar?.topicProgress) {
+      const topicRows = Object.values(grammar.topicProgress).map(grammarProgressToRow);
+      if (topicRows.length > 0) {
+        ops.push(supabase.from("grammar_progress").upsert(topicRows, { onConflict: "id" }));
+      }
     }
 
     await Promise.all(ops);
