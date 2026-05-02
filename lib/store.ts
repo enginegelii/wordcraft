@@ -331,6 +331,15 @@ export const useAppStore = create<AppState>()(
     {
       name: "wordcraft-storage",
       version: 1,
+      // isSyncing localStorage'a kaydedilmemeli — takılı kalır
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        words: state.words,
+        reviews: state.reviews,
+        gameSessions: state.gameSessions,
+        achievements: state.achievements,
+        stats: state.stats,
+      }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
         if (state?.isAuthenticated) {
