@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Filter, Volume2, Trash2, BookOpen, Plus } from "lucide-react";
+import { Search, Volume2, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { cn, formatRelativeDate } from "@/lib/utils";
@@ -27,6 +27,7 @@ export default function WordsPage() {
   const [statusFilter, setStatusFilter] = useState<WordStatus | "all">("all");
   const [tagFilter, setTagFilter] = useState("tümü");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [expandedExamples, setExpandedExamples] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     return words.filter((w) => {
@@ -177,15 +178,46 @@ export default function WordsPage() {
                   </div>
                 </div>
 
-                {/* Örnek cümle */}
-                {word.examples[0] && (
-                  <div className="mt-3 pt-3 border-t border-[hsl(var(--border))]">
-                    <p className="text-sm text-[hsl(var(--foreground))] italic">
-                      &ldquo;{word.examples[0].en}&rdquo;
-                    </p>
-                    <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
-                      {word.examples[0].tr}
-                    </p>
+                {/* Örnek cümleler */}
+                {word.examples.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-[hsl(var(--border))] space-y-2">
+                    {/* Her zaman ilk cümle görünür */}
+                    <div>
+                      <p className="text-sm text-[hsl(var(--foreground))] italic">
+                        &ldquo;{word.examples[0].en}&rdquo;
+                      </p>
+                      <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+                        {word.examples[0].tr}
+                      </p>
+                    </div>
+                    {/* Geri kalan cümleler — açılır/kapanır */}
+                    {expandedExamples.has(word.id) && word.examples.slice(1).map((ex, i) => (
+                      <div key={i} className="pl-3 border-l-2 border-[hsl(var(--border))]">
+                        <p className="text-sm text-[hsl(var(--foreground))] italic">
+                          &ldquo;{ex.en}&rdquo;
+                        </p>
+                        <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+                          {ex.tr}
+                        </p>
+                      </div>
+                    ))}
+                    {/* Aç/Kapat butonu — birden fazla cümle varsa */}
+                    {word.examples.length > 1 && (
+                      <button
+                        onClick={() => setExpandedExamples(prev => {
+                          const next = new Set(prev);
+                          next.has(word.id) ? next.delete(word.id) : next.add(word.id);
+                          return next;
+                        })}
+                        className="flex items-center gap-1 text-xs text-brand-500 hover:text-brand-600 mt-1 font-medium"
+                      >
+                        {expandedExamples.has(word.id) ? (
+                          <><ChevronUp className="w-3 h-3" /> Gizle</>
+                        ) : (
+                          <><ChevronDown className="w-3 h-3" /> +{word.examples.length - 1} cümle daha</>
+                        )}
+                      </button>
+                    )}
                   </div>
                 )}
 

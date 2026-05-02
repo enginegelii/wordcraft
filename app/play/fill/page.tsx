@@ -10,6 +10,7 @@ import type { Word } from "@/lib/types";
 interface Question {
   word: Word;
   sentence: string;
+  sentenceTr: string; // seçilen cümlenin Türkçe çevirisi
   answer: string;
   options: string[];
 }
@@ -19,8 +20,21 @@ function buildQuestions(words: Word[]): Question[] {
   if (eligibleWords.length === 0) return [];
   const selected = shuffle(eligibleWords).slice(0, 8);
 
+  // Aynı oyunda aynı kelime tekrar çıkarsa farklı cümle seçmek için kullanılan index takibi
+  const usedIdx: Record<string, number[]> = {};
+
   return selected.map((word) => {
-    const example = word.examples[0];
+    if (!usedIdx[word.id]) usedIdx[word.id] = [];
+
+    // Henüz kullanılmamış cümlelerden rastgele seç
+    const available = word.examples
+      .map((_, i) => i)
+      .filter((i) => !usedIdx[word.id].includes(i));
+    const pool = available.length > 0 ? available : word.examples.map((_, i) => i);
+    const exIdx = pool[Math.floor(Math.random() * pool.length)];
+    usedIdx[word.id].push(exIdx);
+
+    const example = word.examples[exIdx];
     const sentence = example.en.replace(
       new RegExp(`\\b${word.word}\\b`, "gi"),
       "___"
@@ -28,7 +42,7 @@ function buildQuestions(words: Word[]): Question[] {
     const otherWords = words.filter((w) => w.id !== word.id);
     const wrongOptions = shuffle(otherWords).slice(0, 3).map((w) => w.word);
     const options = shuffle([word.word, ...wrongOptions]);
-    return { word, sentence, answer: word.word, options };
+    return { word, sentence, sentenceTr: example.tr, answer: word.word, options };
   });
 }
 
@@ -262,7 +276,7 @@ export default function FillPage() {
               </p>
             )}
             <p className="text-sm text-[hsl(var(--muted-foreground))]">
-              {current.word.examples[0].tr}
+              {current.sentenceTr}
             </p>
           </div>
         )}

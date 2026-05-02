@@ -14,14 +14,19 @@ SADECE geçerli JSON döndür, başka hiçbir şey yazma. JSON şeması:
   "partOfSpeech": "noun|verb|adjective|adverb|pronoun|preposition|conjunction|interjection|phrasal verb|idiom|other",
   "ipa": "/IPA transkripsiyon/",
   "examples": [
-    {"en": "İngilizce örnek cümle 1", "tr": "Türkçe çeviri 1"},
-    {"en": "İngilizce örnek cümle 2", "tr": "Türkçe çeviri 2"}
+    {"en": "İngilizce örnek cümle 1 — farklı bağlam/zorluk", "tr": "Türkçe çeviri 1"},
+    {"en": "İngilizce örnek cümle 2 — farklı bağlam/zorluk", "tr": "Türkçe çeviri 2"},
+    {"en": "İngilizce örnek cümle 3 — farklı bağlam/zorluk", "tr": "Türkçe çeviri 3"},
+    {"en": "İngilizce örnek cümle 4 — farklı bağlam/zorluk", "tr": "Türkçe çeviri 4"},
+    {"en": "İngilizce örnek cümle 5 — farklı bağlam/zorluk", "tr": "Türkçe çeviri 5"}
   ],
   "synonyms": ["eş anlamlı1", "eş anlamlı2"],
   "antonyms": ["zıt anlamlı1"],
   "contextTag": "günlük|iş|akademik|argo|teknik|edebi|informal|genel",
   "grammarNote": "Önemli gramer notu (varsa, yoksa null)"
-}`;
+}
+
+ÖNEMLI: "examples" dizisinde tam olarak 5 adet örnek cümle olsun. Her cümle farklı bir bağlamda, farklı zorluk seviyesinde olsun (basit günlük → karmaşık/akademik). Kelime her cümlede geçmeli.`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -79,7 +84,7 @@ export async function POST(req: NextRequest) {
 
     const response = await client.messages.create({
       model: "claude-opus-4-5",
-      max_tokens: 1024,
+      max_tokens: 1800,
       system: SYSTEM_PROMPT,
       messages: [
         { role: "user", content: userMessage },
