@@ -7,6 +7,7 @@ import {
   GrammarState, GrammarTopicProgress,
   getLevelFromXP, BADGES,
   getGrammarLevelFromXP,
+  GRAMMAR_LEVEL_ORDER, GRAMMAR_XP_THRESHOLDS,
 } from "./types";
 import {
   createInitialReview, calculateSM2, isDueForReview,
@@ -389,9 +390,19 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           const newXP = (state.grammar.grammarXP ?? 0) + amount;
           const currentLevel = state.grammar.level;
-          // Seviye atlama kontrolü (sadece seviye belirlenmişse)
-          const newLevel = currentLevel ? getGrammarLevelFromXP(newXP, currentLevel) : currentLevel;
-          const leveledUp = newLevel !== currentLevel;
+          if (!currentLevel) return { grammar: { ...state.grammar, grammarXP: newXP } };
+
+          // SADECE yükselt, asla düşürme — bir sonraki seviyeye yetecek XP var mı bak
+          const currentIdx = GRAMMAR_LEVEL_ORDER.indexOf(currentLevel);
+          let newLevel = currentLevel;
+          // Tüm üst seviyeleri kontrol et (birden fazla atlama mümkün)
+          for (let i = currentIdx + 1; i < GRAMMAR_LEVEL_ORDER.length; i++) {
+            const candidate = GRAMMAR_LEVEL_ORDER[i];
+            if (newXP >= GRAMMAR_XP_THRESHOLDS[candidate]) {
+              newLevel = candidate;
+            }
+          }
+
           return {
             grammar: {
               ...state.grammar,
