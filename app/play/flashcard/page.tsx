@@ -45,9 +45,16 @@ export default function FlashcardPage() {
   const speak = () => {
     if (!current) return;
     if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
       const utt = new SpeechSynthesisUtterance(current.word);
       utt.lang = "en-US";
-      speechSynthesis.speak(utt);
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(
+        (v) => v.lang.startsWith("en") && !v.lang.startsWith("en-IN")
+      );
+      if (enVoice) utt.voice = enVoice;
+      utt.rate = 0.9;
+      window.speechSynthesis.speak(utt);
     }
   };
 
