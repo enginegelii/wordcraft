@@ -252,4 +252,24 @@ function Section({
   return (
     <div className="bg-[hsl(var(--card))] rounded-2xl border border-[hsl(var(--border))] overflow-hidden shadow-sm">
       <div className="px-4 py-3 border-b border-[hsl(var(--border))]">
-        <h2 className="font-semibold text-sm text-[hsl(var(--muted-foreground))] uppercase 
+        <h2 className="font-semibold text-sm text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+          {title}
+        </h2>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Divider() {
+  return <div className="h-px bg-[hsl(var(--border))]" />;
+}
+
+function StatItem({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="text-center py-3">
+      <p className="text-2xl font-black">{value}</p>
+      <p className="text-xs text-[hsl(var(--muted-foreground))]">{label}</p>
+    </div>
+  );
+}

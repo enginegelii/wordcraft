@@ -507,4 +507,41 @@ function WordCardPreview({
           {/* Gramer notu */}
           {card.grammarNote && (
             <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-3">
-              <span className="text-sm">📝</span
+              <span className="text-sm">📝</span>
+              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">{card.grammarNote}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Aksiyon Butonları */}
+      <div className="flex gap-3 p-4 border-t border-[hsl(var(--border))] bg-[hsl(var(--secondary))]/30">
+        <button
+          onClick={onDiscard}
+          className="flex-1 py-3 rounded-xl border border-[hsl(var(--border))] font-semibold text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))] transition-colors active:scale-95 text-sm"
+        >
+          İptal
+        </button>
+        <button
+          onClick={onSave}
+          className="flex-[2] py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold shadow-md shadow-brand-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+        >
+          <Check className="w-4 h-4" />
+          Kelime Defterime Ekle
+        </button>
+      </div>
+    </div>
+  );
+}
+
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1]); // data:image/...;base64, kısmını çıkar
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
