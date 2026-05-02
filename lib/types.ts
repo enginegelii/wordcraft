@@ -44,7 +44,7 @@ export interface Review {
 
 export interface GameSession {
   id: string;
-  gameType: "flashcard" | "match" | "fill" | "dictation";
+  gameType: "flashcard" | "match" | "fill" | "dictation" | "story" | "boss";
   score: number;
   wordsPracticed: string[];
   playedAt: string;

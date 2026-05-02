@@ -36,6 +36,26 @@ const GAMES = [
     requiredWords: 4,
     badge: null,
   },
+  {
+    href: "/play/story",
+    icon: "📜",
+    title: "Hikaye Modu",
+    description: "Gölge Büyücüsü'nün esir aldığı kelimeleri kurtarmak için 5 bölümlük epik maceraya atıl.",
+    color: "from-indigo-600 to-purple-700",
+    shadow: "shadow-indigo-500/20",
+    requiredWords: 10,
+    badge: "Yeni ✨",
+  },
+  {
+    href: "/play/boss",
+    icon: "🐉",
+    title: "Boss Battle",
+    description: "Hafıza Ejderhası Mnemosux ile epik bir savaşa gir. Doğru cevapla hasar ver, yanlış cevap verirsen o sana saldırır!",
+    color: "from-red-600 to-orange-700",
+    shadow: "shadow-red-500/20",
+    requiredWords: 20,
+    badge: "Sert 💀",
+  },
 ];
 
 export default function PlayPage() {
@@ -106,16 +126,6 @@ export default function PlayPage() {
         })}
       </div>
 
-      {/* Yakında gelecek */}
-      <div className="bg-[hsl(var(--card))] rounded-2xl border border-[hsl(var(--border))] p-4 opacity-60">
-        <div className="flex items-center gap-3">
-          <Lock className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
-          <div>
-            <p className="font-semibold">Yakında: Hikaye Modu & Boss Battle</p>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Daha fazla kelime öğrendikçe açılacak</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
