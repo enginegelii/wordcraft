@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, Plus, Gamepad2, Settings, Flame,
-  Star, Zap,
+  Star, Zap, LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -24,6 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hasHydrated = useAppStore((s) => s._hasHydrated);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const logout = useAppStore((s) => s.logout);
   const stats = useAppStore((s) => s.stats);
   const words = useAppStore((s) => s.words);
   const getDueWords = useAppStore((s) => s.getDueWords);
@@ -141,11 +142,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Bottom */}
-        <div className="px-4 py-4 border-t border-[hsl(var(--border))]">
+        <div className="px-4 py-4 border-t border-[hsl(var(--border))] space-y-2">
           <div className="flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
             <span>{words.length} kelime</span>
             <ThemeToggle />
           </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))] hover:text-red-500 transition-colors w-full px-1 py-1"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Çıkış Yap
+          </button>
         </div>
       </aside>
 
@@ -170,6 +178,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="font-bold text-yellow-600 dark:text-yellow-400 text-xs">{stats.xp}</span>
               </div>
               <ThemeToggle />
+              <button
+                onClick={logout}
+                className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-[hsl(var(--muted-foreground))] hover:text-red-500 transition-colors"
+                title="Çıkış Yap"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </header>
