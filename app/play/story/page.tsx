@@ -343,6 +343,8 @@ export default function StoryPage() {
   const storeWords = useAppStore.getState().words;
   const reviewWord = useAppStore(s => s.reviewWord);
   const addGameSession = useAppStore(s => s.addGameSession);
+  const addGrammarXP = useAppStore(s => s.addGrammarXP);
+  const grammarLevel = useAppStore(s => s.grammar.level);
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [chapterIdx, setChapterIdx] = useState(0);
@@ -397,6 +399,7 @@ export default function StoryPage() {
     if (ok) {
       playSound("correct"); triggerHaptic("light");
       reviewWord(challenge.word.id, 4);
+      if (grammarLevel) addGrammarXP(2); // Story modunda +2 (daha zorlu)
       setShowSlash(true); setTimeout(() => setShowSlash(false), 380);
       setEnemyHit(true); setTimeout(() => setEnemyHit(false), 500);
       setFlash("green"); setTimeout(() => setFlash(null), 300);

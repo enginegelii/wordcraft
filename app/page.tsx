@@ -3,11 +3,12 @@
 import Link from "next/link";
 import {
   Flame, Star, BookOpen, Gamepad2, Plus, Target,
-  TrendingUp, Zap, Clock, ChevronRight, Trophy,
+  TrendingUp, Zap, Clock, ChevronRight, Trophy, GraduationCap,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { cn, formatRelativeDate } from "@/lib/utils";
-import { getXPForNextLevel, LEVEL_THRESHOLDS, BADGES } from "@/lib/types";
+import { getXPForNextLevel, LEVEL_THRESHOLDS, BADGES, GRAMMAR_XP_THRESHOLDS, GRAMMAR_LEVEL_ORDER } from "@/lib/types";
+import { GRAMMAR_TOPICS, LEVEL_DISPLAY } from "@/lib/grammar-data";
 import { useEffect } from "react";
 
 export default function Dashboard() {
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const achievements = useAppStore((s) => s.achievements);
   const getDueWords = useAppStore((s) => s.getDueWords);
   const checkAndUpdateStreak = useAppStore((s) => s.checkAndUpdateStreak);
+  const grammar = useAppStore((s) => s.grammar);
 
   useEffect(() => {
     checkAndUpdateStreak();
@@ -33,6 +35,21 @@ export default function Dashboard() {
   const masteredCount = words.filter((w) => w.status === "mastered").length;
   const learningCount = words.filter((w) => w.status === "learning" || w.status === "review").length;
   const todayProgress = Math.min(stats.dailyGoal, stats.totalReviews); // simplified
+
+  // Gramer seviyesi hesaplamaları
+  const grammarLevel = grammar.level;
+  const grammarXP = grammar.grammarXP ?? 0;
+  const completedTopics = Object.values(grammar.topicProgress).filter((p) => p.quizCompleted).length;
+  const totalTopics = GRAMMAR_TOPICS.length;
+  const grammarLevelInfo = grammarLevel ? LEVEL_DISPLAY[grammarLevel] : null;
+  const grammarLevelIdx = grammarLevel ? GRAMMAR_LEVEL_ORDER.indexOf(grammarLevel) : -1;
+  const nextGrammarLevel = grammarLevelIdx >= 0 && grammarLevelIdx < GRAMMAR_LEVEL_ORDER.length - 1
+    ? GRAMMAR_LEVEL_ORDER[grammarLevelIdx + 1] : null;
+  const currentGrammarThreshold = grammarLevel ? GRAMMAR_XP_THRESHOLDS[grammarLevel] : 0;
+  const nextGrammarThreshold = nextGrammarLevel ? GRAMMAR_XP_THRESHOLDS[nextGrammarLevel] : currentGrammarThreshold + 600;
+  const grammarProgressPct = Math.min(100,
+    ((grammarXP - currentGrammarThreshold) / Math.max(1, nextGrammarThreshold - currentGrammarThreshold)) * 100
+  );
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto lg:max-w-4xl space-y-6">
@@ -191,6 +208,71 @@ export default function Dashboard() {
           bg="bg-orange-50 dark:bg-orange-950/20"
         />
       </div>
+
+      {/* Gramer Seviyesi Widget */}
+      {grammar.placementDone && grammarLevelInfo && (
+        <Link href="/grammar" className="block">
+          <div className="relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-sm hover:shadow-md transition-shadow active:scale-[0.99]">
+            {/* Arkaplan efekti */}
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
+              <GraduationCap className="w-full h-full" />
+            </div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center shadow-sm">
+                    <GraduationCap className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Gramer Seviyesi</p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                      {completedTopics}/{totalTopics} konu tamamlandı
+                    </p>
+                  </div>
+                </div>
+                <span className={cn(
+                  "text-xs font-bold px-3 py-1 rounded-full border",
+                  grammarLevelInfo.bg, grammarLevelInfo.color
+                )}>
+                  {grammarLevelInfo.label}
+                </span>
+              </div>
+
+              {/* XP İlerleme */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
+                  <span>{grammarXP} Gramer XP</span>
+                  {nextGrammarLevel && (
+                    <span className="text-indigo-500 font-medium">
+                      {nextGrammarThreshold - grammarXP} XP → {LEVEL_DISPLAY[nextGrammarLevel].label}
+                    </span>
+                  )}
+                  {!nextGrammarLevel && (
+                    <span className="text-green-500 font-medium">Maksimum Seviye 🏆</span>
+                  )}
+                </div>
+                <div className="h-2 bg-[hsl(var(--secondary))] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full transition-all duration-700"
+                    style={{ width: `${nextGrammarLevel ? grammarProgressPct : 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      )}
+
+      {/* Gramer - henüz seviye belirlenmemiş */}
+      {!grammar.placementDone && (
+        <Link href="/grammar" className="block">
+          <div className="rounded-2xl border-2 border-dashed border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/10 p-4 text-center hover:border-indigo-400 transition-colors active:scale-[0.99]">
+            <GraduationCap className="w-8 h-8 text-indigo-400 mx-auto mb-2" />
+            <p className="font-semibold text-sm text-indigo-700 dark:text-indigo-300">Gramer Seviyeni Belirle</p>
+            <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">10 soruluk kısa test →</p>
+          </div>
+        </Link>
+      )}
 
       {/* Son Eklenen Kelimeler */}
       {recentWords.length > 0 && (

@@ -11,6 +11,7 @@ import { useAppStore } from "@/lib/store";
 import { cn, playSound, triggerHaptic } from "@/lib/utils";
 import type { Word } from "@/lib/types";
 import type { ReviewQuality } from "@/lib/sm2";
+import { LEVEL_DISPLAY } from "@/lib/grammar-data";
 
 export default function FlashcardPage() {
   const router = useRouter();
@@ -18,6 +19,9 @@ export default function FlashcardPage() {
   const getDueWords = useAppStore((s) => s.getDueWords);
   const reviewWord = useAppStore((s) => s.reviewWord);
   const addGameSession = useAppStore((s) => s.addGameSession);
+  const addGrammarXP = useAppStore((s) => s.addGrammarXP);
+  const grammar = useAppStore((s) => s.grammar);
+  const grammarLevelInfo = grammar.level ? LEVEL_DISPLAY[grammar.level] : null;
 
   const [queue, setQueue] = useState<Word[]>([]);
   const [index, setIndex] = useState(0);
@@ -77,6 +81,8 @@ export default function FlashcardPage() {
     if (quality >= 4) {
       playSound("correct");
       triggerHaptic("light");
+      // Gramer seviyesi belirlenmişse her doğru cevap +1 Gramer XP
+      if (grammar.level) addGrammarXP(1);
     } else if (quality <= 1) {
       playSound("wrong");
       triggerHaptic("heavy");
@@ -229,6 +235,15 @@ export default function FlashcardPage() {
               )}
               {current.grammarNote && (
                 <p className="text-xs text-blue-600 dark:text-blue-300 text-center font-medium">📝 {current.grammarNote}</p>
+              )}
+              {/* Gramer seviyesi badge */}
+              {grammarLevelInfo && (
+                <div className={cn(
+                  "inline-flex items-center gap-1 self-center px-2.5 py-1 rounded-full border text-[10px] font-bold",
+                  grammarLevelInfo.bg, grammarLevelInfo.color
+                )}>
+                  🎓 {grammarLevelInfo.label}
+                </div>
               )}
             </div>
           </div>

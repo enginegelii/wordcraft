@@ -6,6 +6,7 @@ import {
   Word, Review, GameSession, UserStats, Achievement,
   GrammarState, GrammarTopicProgress,
   getLevelFromXP, BADGES,
+  getGrammarLevelFromXP,
 } from "./types";
 import {
   createInitialReview, calculateSM2, isDueForReview,
@@ -55,6 +56,7 @@ interface AppState {
   markTopicStudied: (topicId: string) => void;
   completeTopicQuiz: (topicId: string, score: number) => void;
   getTopicProgress: (topicId: string) => GrammarTopicProgress | null;
+  addGrammarXP: (amount: number) => void;
 }
 
 const defaultStats: UserStats = {
@@ -71,6 +73,7 @@ const defaultGrammar: GrammarState = {
   level: null,
   placementDone: false,
   topicProgress: {},
+  grammarXP: 0,
 };
 
 const ALLOWED_PHONE = "5457827477";
@@ -372,11 +375,31 @@ export const useAppStore = create<AppState>()(
         });
         const xpGain = Math.round((score / 100) * 20);
         get().addXP(xpGain);
+        // Gramer XP: quiz skoru ≥70 ise +50, 50-70 arası +30, altı +15
+        const grammarXPGain = score >= 70 ? 50 : score >= 50 ? 30 : 15;
+        get().addGrammarXP(grammarXPGain);
         get().checkAndUpdateStreak();
       },
 
       getTopicProgress: (topicId) => {
         return get().grammar.topicProgress[topicId] ?? null;
+      },
+
+      addGrammarXP: (amount) => {
+        set((state) => {
+          const newXP = (state.grammar.grammarXP ?? 0) + amount;
+          const currentLevel = state.grammar.level;
+          // Seviye atlama kontrolü (sadece seviye belirlenmişse)
+          const newLevel = currentLevel ? getGrammarLevelFromXP(newXP, currentLevel) : currentLevel;
+          const leveledUp = newLevel !== currentLevel;
+          return {
+            grammar: {
+              ...state.grammar,
+              grammarXP: newXP,
+              level: newLevel,
+            },
+          };
+        });
       },
 
       checkAchievements: () => {

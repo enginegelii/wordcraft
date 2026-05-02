@@ -100,17 +100,37 @@ export interface GrammarState {
   level: GrammarLevel | null;          // null = henüz belirlenmedi
   placementDone: boolean;
   topicProgress: Record<string, GrammarTopicProgress>; // topicId → progress
+  grammarXP: number;                   // Gramer ilerleme puanı
 }
 
-// ─── BADGES ──────────────────────────────────────────────────────────────────
-
-export const BADGES = {
-  FIRST_WORD: { id: "first_word", icon: "🌱", name: "İlk Kelime", desc: "İlk kelimeni ekledin!" },
-  STREAK_3: { id: "streak_3", icon: "🔥", name: "3 Günlük Seri", desc: "3 gün üst üste çalıştın!" },
-  STREAK_7: { id: "streak_7", icon: "⚡", name: "Haftalık Seri", desc: "7 gün üst üste!" },
-  STREAK_30: { id: "streak_30", icon: "💎", name: "Aylık Seri", desc: "30 gün üst üste!" },
-  WORDS_10: { id: "words_10", icon: "📚", name: "10 Kelime", desc: "10 kelime ekledin!" },
-  WORDS_50: { id: "words_50", icon: "🏆", name: "50 Kelime", desc: "50 kelime ekledin!" },
-  WORDS_100: { id: "words_100", icon: "👑", name: "100 Kelime", desc: "100 kelime ekledin!" },
-  PERFECT_GAME: { id: "perfect_game", icon: "⭐", name: "Mükemmel Oyun", desc: "Oyunda tam puan!" },
+// Gramer seviyesi eşikleri (grammarXP bazlı)
+export const GRAMMAR_XP_THRESHOLDS: Record<GrammarLevel, number> = {
+  "intermediate": 0,
+  "upper-intermediate": 200,
+  "advanced": 400,
+  "advanced-plus": 600,
 };
+
+export const GRAMMAR_LEVEL_ORDER: GrammarLevel[] = [
+  "intermediate",
+  "upper-intermediate",
+  "advanced",
+  "advanced-plus",
+];
+
+// Seviye için gereken XP ve bir sonraki seviye bilgisi
+export function getNextGrammarLevel(level: GrammarLevel): GrammarLevel | null {
+  const idx = GRAMMAR_LEVEL_ORDER.indexOf(level);
+  return idx < GRAMMAR_LEVEL_ORDER.length - 1 ? GRAMMAR_LEVEL_ORDER[idx + 1] : null;
+}
+
+export function getGrammarLevelFromXP(xp: number, currentLevel: GrammarLevel): GrammarLevel {
+  // XP'ye göre ulaşılabilecek en yüksek seviyeyi bul
+  let result: GrammarLevel = currentLevel;
+  for (const level of GRAMMAR_LEVEL_ORDER) {
+    if (xp >= GRAMMAR_XP_THRESHOLDS[level]) {
+      result = level;
+    }
+  }
+  return result;
+}

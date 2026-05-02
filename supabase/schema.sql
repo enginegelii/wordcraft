@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 -- Kullanıcı istatistikleri (tek satır: id = 1)
+-- Multi-user için: id → UUID, user_id sütunu ekle, RLS'i aç
 CREATE TABLE IF NOT EXISTS user_stats (
   id INTEGER PRIMARY KEY DEFAULT 1,
   streak_count INTEGER DEFAULT 0,
@@ -39,7 +40,11 @@ CREATE TABLE IF NOT EXISTS user_stats (
   level INTEGER DEFAULT 1,
   total_words_added INTEGER DEFAULT 0,
   total_reviews INTEGER DEFAULT 0,
-  daily_goal INTEGER DEFAULT 10
+  daily_goal INTEGER DEFAULT 10,
+  -- Gramer alanları
+  grammar_level TEXT DEFAULT NULL,       -- 'intermediate' | 'upper-intermediate' | 'advanced' | 'advanced-plus'
+  grammar_xp INTEGER DEFAULT 0,         -- Gramer seviyesi ilerleme puanı
+  grammar_placement_done BOOLEAN DEFAULT FALSE
 );
 
 -- Oyun seansları
@@ -52,6 +57,18 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   duration INTEGER DEFAULT 0
 );
 
+-- Gramer konu ilerlemesi
+-- Multi-user için: user_id sütunu ekle (TEXT, Supabase auth UID), PRIMARY KEY'i (user_id, topic_id) yap
+CREATE TABLE IF NOT EXISTS grammar_progress (
+  id TEXT PRIMARY KEY,
+  topic_id TEXT NOT NULL,
+  studied BOOLEAN DEFAULT FALSE,
+  quiz_completed BOOLEAN DEFAULT FALSE,
+  quiz_score INTEGER DEFAULT 0,
+  completed_at TIMESTAMPTZ DEFAULT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Başarımlar
 CREATE TABLE IF NOT EXISTS achievements (
   id TEXT PRIMARY KEY,
@@ -60,8 +77,10 @@ CREATE TABLE IF NOT EXISTS achievements (
 );
 
 -- RLS'i kapat (kişisel kullanım, tek kullanıcı)
+-- Multi-user için: ENABLE ROW LEVEL SECURITY yap, policy ekle
 ALTER TABLE words DISABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_stats DISABLE ROW LEVEL SECURITY;
 ALTER TABLE game_sessions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE achievements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE grammar_progress DISABLE ROW LEVEL SECURITY;

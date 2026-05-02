@@ -14,6 +14,8 @@ const GAME_TIME = 60; // saniye
 export default function MatchPage() {
   const words = useAppStore((s) => s.words);
   const addGameSession = useAppStore((s) => s.addGameSession);
+  const addGrammarXP = useAppStore((s) => s.addGrammarXP);
+  const grammarLevel = useAppStore((s) => s.grammar.level);
 
   const [gameWords, setGameWords] = useState<Word[]>([]);
   const [cards, setCards] = useState<CardType[]>([]);
@@ -107,6 +109,7 @@ export default function MatchPage() {
       setSelected(null);
       playSound("correct");
       triggerHaptic("light");
+      if (grammarLevel) addGrammarXP(1);
     } else {
       // Yanlış eşleşme
       setCombo(0);
