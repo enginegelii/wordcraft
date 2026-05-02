@@ -208,6 +208,17 @@ export const useAppStore = create<AppState>()(
               await pushLocalDataToCloud(mergedWords, mergedReviews, mergedStats, get().gameSessions, mergedAchievements, mergedGrammar);
             }
 
+            // Eğer local'de grammar level var ama cloud'da yoksa → cloud'a yaz
+            // (Kullanıcı sync özelliğinden önce placement test yapmış olabilir)
+            if (mergedGrammar.level && !cloudGrammarMeta?.level) {
+              console.log("[sync] Grammar level local'de var, cloud'a yazılıyor...");
+              upsertGrammarMeta(mergedGrammar, mergedStats);
+              // Topic progress varsa onları da yaz
+              Object.values(mergedGrammar.topicProgress ?? {}).forEach((tp) => {
+                upsertGrammarProgress(tp);
+              });
+            }
+
             // Cloud'da hâlâ var olabilecek silinmiş kelimeleri temizle
             const deletedIdsList = get().deletedWordIds;
             if (deletedIdsList.length > 0) {
