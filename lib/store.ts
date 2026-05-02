@@ -35,12 +35,14 @@ interface AppState {
   reviews: Record<string, Review>;
   gameSessions: GameSession[];
   achievements: Achievement[];
+  deletedWordIds: string[];   // kalıcı silme takibi
   stats: UserStats;
   grammar: GrammarState;
 
   setHasHydrated: (state: boolean) => void;
   login: (phone: string) => boolean;
   logout: () => void;
+  clearDeletedWordIds: () => void;
   syncFromCloud: () => Promise<void>;
   addWord: (word: Omit<Word, "id" | "createdAt" | "status">) => Word;
   deleteWord: (id: string) => void;
@@ -91,10 +93,13 @@ export const useAppStore = create<AppState>()(
       reviews: {},
       gameSessions: [],
       achievements: [],
+      deletedWordIds: [],
       stats: defaultStats,
       grammar: defaultGrammar,
 
       setHasHydrated: (state) => set({ _hasHydrated: state }),
+
+      clearDeletedWordIds: () => set({ deletedWordIds: [] }),
 
       login: (phone) => {
         const cleaned = phone.replace(/\s/g, "");
@@ -141,10 +146,18 @@ export const useAppStore = create<AppState>()(
           }
 
           if (cloudHasData) {
-            // İki tarafı birleştir: cloud + local → union by id
-            const cloudWordMap = new Map(cloudData.words.map((w) => [w.id, w]));
-            const localOnlyWords = localWords.filter((w) => !cloudWordMap.has(w.id));
-            const mergedWords = [...cloudData.words, ...localOnlyWords];
+            // Silinen ID'leri al — bunlar cloud'dan gelse bile eklenmeyecek
+            const deletedIds = new Set(get().deletedWordIds);
+
+            // Cloud'dan gelen kelimeleri filtrele (silinmişleri çıkar)
+            const filteredCloudWords = cloudData.words.filter((w) => !deletedIds.has(w.id));
+            const cloudWordMap = new Map(filteredCloudWords.map((w) => [w.id, w]));
+
+            // Local-only: cloud'da olmayan ve silinmemiş kelimeler
+            const localOnlyWords = localWords.filter(
+              (w) => !cloudWordMap.has(w.id) && !deletedIds.has(w.id)
+            );
+            const mergedWords = [...filteredCloudWords, ...localOnlyWords];
 
             const mergedReviews = { ...localReviews, ...cloudData.reviews };
 
@@ -195,6 +208,12 @@ export const useAppStore = create<AppState>()(
               await pushLocalDataToCloud(mergedWords, mergedReviews, mergedStats, get().gameSessions, mergedAchievements, mergedGrammar);
             }
 
+            // Cloud'da hâlâ var olabilecek silinmiş kelimeleri temizle
+            const deletedIdsList = get().deletedWordIds;
+            if (deletedIdsList.length > 0) {
+              deletedIdsList.forEach((id) => deleteWordFromDB(id));
+            }
+
             console.log(`[sync] Merged: ${mergedWords.length} words total`);
           } else {
             set({ isSyncing: false });
@@ -238,6 +257,8 @@ export const useAppStore = create<AppState>()(
           return {
             words: state.words.filter((w) => w.id !== id),
             reviews: remainingReviews,
+            // Silinen ID'yi takip et (sync sırasında cloud'dan geri gelmesin)
+            deletedWordIds: [...new Set([...state.deletedWordIds, id])].slice(-500),
           };
         });
         deleteWordFromDB(id);
@@ -480,7 +501,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "wordcraft-storage",
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
         const state = persistedState as any;
         // v1 → v2: grammar alanlarını güvenli hale getir
@@ -490,6 +511,8 @@ export const useAppStore = create<AppState>()(
           if (!state.grammar.topicProgress) state.grammar.topicProgress = {};
           if (state.grammar.grammarXP === undefined) state.grammar.grammarXP = 0;
         }
+        // v2 → v3: deletedWordIds ekle
+        if (!state.deletedWordIds) state.deletedWordIds = [];
         return state;
       },
       partialize: (state) => ({
@@ -498,6 +521,7 @@ export const useAppStore = create<AppState>()(
         reviews: state.reviews,
         gameSessions: state.gameSessions,
         achievements: state.achievements,
+        deletedWordIds: state.deletedWordIds,
         stats: state.stats,
         grammar: state.grammar,
       }),
