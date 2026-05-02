@@ -13,6 +13,7 @@ import {
 import { generateId } from "./utils";
 
 interface AppState {
+  isAuthenticated: boolean;
   words: Word[];
   reviews: Record<string, Review>; // wordId -> Review
   gameSessions: GameSession[];
@@ -20,6 +21,8 @@ interface AppState {
   stats: UserStats;
 
   // Actions
+  login: (phone: string) => boolean;
+  logout: () => void;
   addWord: (word: Omit<Word, "id" | "createdAt" | "status">) => Word;
   deleteWord: (id: string) => void;
   getWord: (id: string) => Word | undefined;
@@ -42,14 +45,28 @@ const defaultStats: UserStats = {
   dailyGoal: 10,
 };
 
+const ALLOWED_PHONE = "5457827477";
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
+      isAuthenticated: false,
       words: [],
       reviews: {},
       gameSessions: [],
       achievements: [],
       stats: defaultStats,
+
+      login: (phone) => {
+        const cleaned = phone.replace(/\s/g, "");
+        if (cleaned === ALLOWED_PHONE) {
+          set({ isAuthenticated: true });
+          return true;
+        }
+        return false;
+      },
+
+      logout: () => set({ isAuthenticated: false }),
 
       addWord: (wordData) => {
         const word: Word = {

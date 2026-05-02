@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 import { getXPForNextLevel, LEVEL_THRESHOLDS } from "@/lib/types";
 import { ThemeToggle } from "./ThemeToggle";
+import { LoginScreen } from "@/components/LoginScreen";
 
 const NAV_ITEMS = [
   { href: "/", label: "Ana Sayfa", icon: Home },
@@ -21,9 +22,15 @@ const NAV_ITEMS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const stats = useAppStore((s) => s.stats);
   const words = useAppStore((s) => s.words);
   const getDueWords = useAppStore((s) => s.getDueWords);
+
+  // Giriş yapılmamışsa login ekranı göster
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   const dueCount = getDueWords().length;
   const currentLevelXP = LEVEL_THRESHOLDS[stats.level - 1] ?? 0;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Target, Moon, Sun, Trash2, Download, Trophy,
-  Bell, ChevronRight, Info, Check,
+  ChevronRight, Check, LogOut,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAppStore } from "@/lib/store";
@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const achievements = useAppStore((s) => s.achievements);
   const updateStats = useAppStore((s) => s.updateStats);
   const words = useAppStore((s) => s.words);
+  const logout = useAppStore((s) => s.logout);
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -205,6 +206,19 @@ export default function SettingsPage() {
               </div>
             </div>
           )}
+        </div>
+      </Section>
+
+      {/* Çıkış */}
+      <Section title="Hesap">
+        <div className="p-4">
+          <button
+            onClick={() => logout()}
+            className="flex items-center gap-3 text-red-500 hover:text-red-600 transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Çıkış Yap</span>
+          </button>
         </div>
       </Section>
 
