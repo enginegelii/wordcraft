@@ -321,6 +321,13 @@ export const useAppStore = create<AppState>()(
         upsertReview(updatedReview);
 
         get().addXP(qualityToXP(quality));
+
+        // Mastery bonus: kelime ilk kez "mastered" olunca +15 XP
+        const oldWord = get().words.find((w) => w.id === wordId);
+        if (newStatus === "mastered" && oldWord?.status !== "mastered") {
+          get().addXP(15);
+        }
+
         get().checkAndUpdateStreak();
       },
 
