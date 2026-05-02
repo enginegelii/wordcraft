@@ -21,6 +21,9 @@ const NAV_ITEMS = [
   { href: "/settings", label: "Ayarlar", icon: Settings },
 ];
 
+// Mobil bottom nav'da ayarlar hariç tüm itemler
+const MOBILE_NAV = NAV_ITEMS.filter((item) => item.href !== "/settings");
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hasHydrated = useAppStore((s) => s._hasHydrated);
@@ -194,7 +197,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[hsl(var(--card))]/95 backdrop-blur-md border-t border-[hsl(var(--border))] pb-safe">
         <div className="flex items-center justify-around px-1 py-2">
-          {NAV_ITEMS.filter((item) => item.href !== "/settings").map((item) => {
+          {MOBILE_NAV.map((item) => {
             const Icon = item.icon;
             const isActive = item.href === "/"
               ? pathname === "/"
@@ -230,16 +233,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {dueCount > 9 ? "9+" : dueCount}
                   </span>
-                )}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-    </div>
-  );
-}
-span>
                 )}
               </Link>
             );
