@@ -343,6 +343,7 @@ export default function StoryPage() {
   const storeWords = useAppStore.getState().words;
   const reviewWord = useAppStore(s => s.reviewWord);
   const addGameSession = useAppStore(s => s.addGameSession);
+  const addXP = useAppStore(s => s.addXP);
   const addGrammarXP = useAppStore(s => s.addGrammarXP);
   const grammarLevel = useAppStore(s => s.grammar.level);
 
@@ -399,6 +400,7 @@ export default function StoryPage() {
     if (ok) {
       playSound("correct"); triggerHaptic("light");
       reviewWord(challenge.word.id, 4);
+      addXP(6); // Story: dogru cevap basina +6 XP
       if (grammarLevel) addGrammarXP(2); // Story modunda +2 (daha zorlu)
       setShowSlash(true); setTimeout(() => setShowSlash(false), 380);
       setEnemyHit(true); setTimeout(() => setEnemyHit(false), 500);
@@ -417,6 +419,9 @@ export default function StoryPage() {
       const dur = Math.round((Date.now() - t0Ref.current) / 1000);
       const score = Math.max(10, 100 - mistakes * 15);
       addGameSession({ gameType: "story", score, wordsPracticed: wordsUsed, playedAt: new Date().toISOString(), duration: dur });
+      // Hikaye tamamlama bonusu: hata sayisina gore (max +40 XP)
+      const completionBonus = Math.max(10, 40 - mistakes * 10);
+      addXP(completionBonus);
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
       setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { x: 0.1 }, colors: ["#f59e0b"] }), 350);
       setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { x: 0.9 }, colors: ["#a855f7"] }), 650);

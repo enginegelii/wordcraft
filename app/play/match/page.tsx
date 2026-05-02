@@ -14,6 +14,7 @@ const GAME_TIME = 60; // saniye
 export default function MatchPage() {
   const words = useAppStore((s) => s.words);
   const addGameSession = useAppStore((s) => s.addGameSession);
+  const addXP = useAppStore((s) => s.addXP);
   const addGrammarXP = useAppStore((s) => s.addGrammarXP);
   const grammarLevel = useAppStore((s) => s.grammar.level);
 
@@ -81,9 +82,10 @@ export default function MatchPage() {
         playedAt: new Date().toISOString(),
         duration,
       });
+      addXP(10); // Tum eslesmeler tamamlama bonusu
       setGameState("finished");
     }
-  }, [matched, gameWords.length, score, startTime, addGameSession, gameWords]);
+  }, [matched, gameWords.length, score, startTime, addGameSession, addXP, gameWords]);
 
   const handleCardClick = useCallback((card: CardType) => {
     if (matched.has(card.id) || gameState !== "playing") return;
@@ -109,6 +111,8 @@ export default function MatchPage() {
       setSelected(null);
       playSound("correct");
       triggerHaptic("light");
+      // XP: combo'ya gore artan odul (kolay oyun)
+      addXP(newCombo >= 3 ? 8 : newCombo >= 2 ? 5 : 3);
       if (grammarLevel) addGrammarXP(1);
     } else {
       // Yanlış eşleşme

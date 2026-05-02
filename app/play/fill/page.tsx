@@ -70,6 +70,7 @@ export default function FillPage() {
   const grammar = useAppStore((s) => s.grammar);
   const reviewWord = useAppStore((s) => s.reviewWord);
   const addGameSession = useAppStore((s) => s.addGameSession);
+  const addXP = useAppStore((s) => s.addXP);
   const addGrammarXP = useAppStore((s) => s.addGrammarXP);
 
   const [gameState, setGameState] = useState<GameState>("ready");
@@ -149,6 +150,9 @@ export default function FillPage() {
       if (current.source === "grammar-ai") {
         grammarCorrectRef.current += 1;
         addGrammarXP(1);
+        addXP(12); // Grammar-AI sorusu daha zor
+      } else {
+        addXP(8); // Kelime haznesi sorusu
       }
       playSound("correct");
       triggerHaptic("light");
@@ -170,6 +174,10 @@ export default function FillPage() {
         playedAt: new Date().toISOString(),
         duration,
       });
+      // Tamamlama bonusu: dogruluk oranina gore (max +25 XP)
+      const accuracy = questions.length > 0 ? correctRef.current / questions.length : 0;
+      const completionBonus = Math.round(accuracy * 25);
+      if (completionBonus > 0) addXP(completionBonus);
       setGameState("finished");
     } else {
       setIndex((i) => i + 1);
