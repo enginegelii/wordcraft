@@ -84,6 +84,26 @@ export function getXPForNextLevel(level: number): number {
   return LEVEL_THRESHOLDS[level] ?? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
 }
 
+// ─── GRAMMAR TYPES ────────────────────────────────────────────────────────────
+
+export type GrammarLevel = "intermediate" | "upper-intermediate" | "advanced" | "advanced-plus";
+
+export interface GrammarTopicProgress {
+  topicId: string;
+  studied: boolean;         // konu anlatımı okundu mu
+  quizCompleted: boolean;   // quiz yapıldı mı
+  quizScore: number;        // son quiz puanı (0-100)
+  completedAt?: string;     // ISO date
+}
+
+export interface GrammarState {
+  level: GrammarLevel | null;          // null = henüz belirlenmedi
+  placementDone: boolean;
+  topicProgress: Record<string, GrammarTopicProgress>; // topicId → progress
+}
+
+// ─── BADGES ──────────────────────────────────────────────────────────────────
+
 export const BADGES = {
   FIRST_WORD: { id: "first_word", icon: "🌱", name: "İlk Kelime", desc: "İlk kelimeni ekledin!" },
   STREAK_3: { id: "streak_3", icon: "🔥", name: "3 Günlük Seri", desc: "3 gün üst üste çalıştın!" },

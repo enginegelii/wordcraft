@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   Word, Review, GameSession, UserStats, Achievement,
+  GrammarState, GrammarTopicProgress,
   getLevelFromXP, BADGES,
 } from "./types";
 import {
@@ -31,6 +32,7 @@ interface AppState {
   gameSessions: GameSession[];
   achievements: Achievement[];
   stats: UserStats;
+  grammar: GrammarState;
 
   setHasHydrated: (state: boolean) => void;
   login: (phone: string) => boolean;
@@ -46,6 +48,13 @@ interface AppState {
   checkAndUpdateStreak: () => void;
   addXP: (amount: number) => void;
   checkAchievements: () => void;
+
+  // Grammar actions
+  setGrammarLevel: (level: GrammarState["level"]) => void;
+  markPlacementDone: (level: GrammarState["level"]) => void;
+  markTopicStudied: (topicId: string) => void;
+  completeTopicQuiz: (topicId: string, score: number) => void;
+  getTopicProgress: (topicId: string) => GrammarTopicProgress | null;
 }
 
 const defaultStats: UserStats = {
@@ -56,6 +65,12 @@ const defaultStats: UserStats = {
   totalWordsAdded: 0,
   totalReviews: 0,
   dailyGoal: 10,
+};
+
+const defaultGrammar: GrammarState = {
+  level: null,
+  placementDone: false,
+  topicProgress: {},
 };
 
 const ALLOWED_PHONE = "5457827477";
@@ -71,6 +86,7 @@ export const useAppStore = create<AppState>()(
       gameSessions: [],
       achievements: [],
       stats: defaultStats,
+      grammar: defaultGrammar,
 
       setHasHydrated: (state) => set({ _hasHydrated: state }),
 
@@ -297,6 +313,146 @@ export const useAppStore = create<AppState>()(
         });
       },
 
+      // ── GRAMMAR ACTIONS ──────────────────────────────────────────────
+      setGrammarLevel: (level) => {
+        set((state) => ({
+          grammar: { ...state.grammar, level },
+        }));
+      },
+
+      markPlacementDone: (level) => {
+        set((state) => ({
+          grammar: { ...state.grammar, level, placementDone: true },
+        }));
+      },
+
+      markTopicStudied: (topicId) => {
+        set((state) => {
+          const existing = state.grammar.topicProgress[topicId] ?? {
+            topicId,
+            studied: false,
+            quizCompleted: false,
+            quizScore: 0,
+          };
+          return {
+            grammar: {
+              ...state.grammar,
+              topicProgress: {
+                ...state.grammar.topicProgress,
+                [topicId]: { ...existing, studied: true },
+              },
+            },
+          };
+        });
+        get().addXP(10);
+      },
+
+      completeTopicQuiz: (topicId, score) => {
+        set((state) => {
+          const existing = state.grammar.topicProgress[topicId] ?? {
+            topicId,
+            studied: false,
+            quizCompleted: false,
+            quizScore: 0,
+          };
+          return {
+            grammar: {
+              ...state.grammar,
+              topicProgress: {
+                ...state.grammar.topicProgress,
+                [topicId]: {
+                  ...existing,
+                  quizCompleted: true,
+                  quizScore: Math.max(existing.quizScore, score),
+                  completedAt: new Date().toISOString(),
+                },
+              },
+            },
+          };
+        });
+        const xpGain = Math.round((score / 100) * 20);
+        get().addXP(xpGain);
+        get().checkAndUpdateStreak();
+      },
+
+      getTopicProgress: (topicId) => {
+        return get().grammar.topicProgress[topicId] ?? null;
+      },
+
+      checkAchievements: () => {
+        const { stats, words, achievements } = get();
+        const hasAchievement = (id: string) => achievements.some((a) => a.badgeId === id);
+        const newAchievements: Achievement[] = [];
+
+        const check = (condition: boolean, badgeId: string) => {
+          if (condition && !hasAchievement(badgeId)) {
+            newAchievements.push({
+              id: generateId(),
+              badgeId,
+              unlockedAt: new Date().toISOString(),
+            });
+          }
+        };
+
+        check(words.length >= 1, BADGES.FIRST_WORD.id);
+        check(words.length >= 10, BADGES.WORDS_10.id);
+        check(words.length >= 50, BADGES.WORDS_50.id);
+        check(words.length >= 100, BADGES.WORDS_100.id);
+        check(stats.streakCount >= 3, BADGES.STREAK_3.id);
+        check(stats.streakCount >= 7, BADGES.STREAK_7.id);
+        check(stats.streakCount >= 30, BADGES.STREAK_30.id);
+
+        if (newAchievements.length > 0) {
+          set((state) => ({
+            achievements: [...state.achievements, ...newAchievements],
+          }));
+          newAchievements.forEach(upsertAchievement);
+        }
+      },
+    }),
+    {
+      name: "wordcraft-storage",
+      version: 1,
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        words: state.words,
+        reviews: state.reviews,
+        gameSessions: state.gameSessions,
+        achievements: state.achievements,
+        stats: state.stats,
+        grammar: state.grammar,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+        if (state?.isAuthenticated) {
+          setTimeout(() => state.syncFromCloud(), 200);
+        }
+      },
+    }
+  )
+);
+              ...state.grammar,
+              topicProgress: {
+                ...state.grammar.topicProgress,
+                [topicId]: {
+                  ...existing,
+                  quizCompleted: true,
+                  quizScore: Math.max(existing.quizScore, score),
+                  completedAt: new Date().toISOString(),
+                },
+              },
+            },
+          };
+        });
+        const xpGain = Math.round((score / 100) * 20);
+        get().addXP(xpGain);
+        get().checkAndUpdateStreak();
+      },
+
+      getTopicProgress: (topicId) => {
+        return get().grammar.topicProgress[topicId] ?? null;
+      },
+
       checkAchievements: () => {
         const { stats, words, achievements } = get();
         const hasAchievement = (id: string) => achievements.some((a) => a.badgeId === id);
@@ -339,6 +495,85 @@ export const useAppStore = create<AppState>()(
         gameSessions: state.gameSessions,
         achievements: state.achievements,
         stats: state.stats,
+        grammar: state.grammar,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+        if (state?.isAuthenticated) {
+          setTimeout(() => state.syncFromCloud(), 200);
+        }
+      },
+    }
+  )
+);
+            quizScore: 0,
+          };
+          return {
+            grammar: {
+              ...state.grammar,
+              topicProgress: {
+                ...state.grammar.topicProgress,
+                [topicId]: {
+                  ...existing,
+                  quizCompleted: true,
+                  quizScore: Math.max(existing.quizScore, score),
+                  completedAt: new Date().toISOString(),
+                },
+              },
+            },
+          };
+        });
+        const xpGain = Math.round((score / 100) * 20);
+        get().addXP(xpGain);
+        get().checkAndUpdateStreak();
+      },
+
+      getTopicProgress: (topicId) => {
+        return get().grammar.topicProgress[topicId] ?? null;
+      },
+
+      checkAchievements: () => {
+        const { stats, words, achievements } = get();
+        const hasAchievement = (id: string) => achievements.some((a) => a.badgeId === id);
+        const newAchievements: Achievement[] = [];
+
+        const check = (condition: boolean, badgeId: string) => {
+          if (condition && !hasAchievement(badgeId)) {
+            newAchievements.push({
+              id: generateId(),
+              badgeId,
+              unlockedAt: new Date().toISOString(),
+            });
+          }
+        };
+
+        check(words.length >= 1, BADGES.FIRST_WORD.id);
+        check(words.length >= 10, BADGES.WORDS_10.id);
+        check(words.length >= 50, BADGES.WORDS_50.id);
+        check(words.length >= 100, BADGES.WORDS_100.id);
+        check(stats.streakCount >= 3, BADGES.STREAK_3.id);
+        check(stats.streakCount >= 7, BADGES.STREAK_7.id);
+        check(stats.streakCount >= 30, BADGES.STREAK_30.id);
+
+        if (newAchievements.length > 0) {
+          set((state) => ({
+            achievements: [...state.achievements, ...newAchievements],
+          }));
+          newAchievements.forEach(upsertAchievement);
+        }
+      },
+    }),
+    {
+      name: "wordcraft-storage",
+      version: 1,
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        words: state.words,
+        reviews: state.reviews,
+        gameSessions: state.gameSessions,
+        achievements: state.achievements,
+        stats: state.stats,
+        grammar: state.grammar,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

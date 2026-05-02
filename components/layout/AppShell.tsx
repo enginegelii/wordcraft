@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, Plus, Gamepad2, Settings, Flame,
-  Star, Zap, LogOut,
+  Star, Zap, LogOut, GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/words", label: "Kelimelerim", icon: BookOpen },
   { href: "/add", label: "Ekle", icon: Plus },
   { href: "/play", label: "Oyna", icon: Gamepad2 },
+  { href: "/grammar", label: "Gramer", icon: GraduationCap },
   { href: "/settings", label: "Ayarlar", icon: Settings },
 ];
 
@@ -192,8 +193,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[hsl(var(--card))]/95 backdrop-blur-md border-t border-[hsl(var(--border))] pb-safe">
-        <div className="flex items-center justify-around px-2 py-2">
-          {NAV_ITEMS.map((item) => {
+        <div className="flex items-center justify-around px-1 py-2">
+          {NAV_ITEMS.filter((item) => item.href !== "/settings").map((item) => {
             const Icon = item.icon;
             const isActive = item.href === "/"
               ? pathname === "/"
@@ -217,18 +218,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all relative",
+                  "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all relative",
                   isActive
                     ? "text-brand-500"
                     : "text-[hsl(var(--muted-foreground))]"
                 )}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <Icon className="w-5 h-5" />
+                <span className="text-[9px] font-medium">{item.label}</span>
                 {item.href === "/play" && dueCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {dueCount > 9 ? "9+" : dueCount}
                   </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
+}
+span>
                 )}
               </Link>
             );
