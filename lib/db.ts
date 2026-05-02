@@ -153,9 +153,21 @@ export async function fetchAllData() {
 // ─── Individual upserts ───────────────────────────────────────────────────────
 
 export async function upsertWord(word: Word) {
-  if (!isSupabaseConfigured || !supabase) return;
-  const { error } = await supabase.from("words").upsert(wordToRow(word));
-  if (error) console.error("[db] upsertWord error:", error.message);
+  console.log("[db] upsertWord çağrıldı:", word.word, "| configured:", isSupabaseConfigured, "| client:", !!supabase);
+  if (!isSupabaseConfigured || !supabase) {
+    console.warn("[db] upsertWord: atlandı — Supabase yapılandırılmamış");
+    return;
+  }
+  try {
+    const { error } = await supabase.from("words").upsert(wordToRow(word));
+    if (error) {
+      console.error("[db] upsertWord HATA:", error.message, error);
+    } else {
+      console.log("[db] upsertWord başarılı ✓", word.word);
+    }
+  } catch (e) {
+    console.error("[db] upsertWord exception:", e);
+  }
 }
 
 export async function deleteWordFromDB(id: string) {
