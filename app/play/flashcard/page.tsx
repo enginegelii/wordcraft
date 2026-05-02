@@ -13,9 +13,6 @@ import type { ReviewQuality } from "@/lib/sm2";
 import { calculateSM2, qualityToXP, getWordStatusFromInterval } from "@/lib/sm2";
 import { LEVEL_DISPLAY } from "@/lib/grammar-data";
 
-// ────────────────────────────────────────────
-// Helpers
-// ────────────────────────────────────────────
 function formatInterval(days: number): string {
   if (days <= 0) return "Bugun";
   if (days === 1) return "Yarin";
@@ -32,16 +29,7 @@ const STATUS_LABEL: Record<string, string> = {
   review: "Tekrarda",
   mastered: "Ogrenildi",
 };
-const STATUS_COLOR: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  learning: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-  review: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  mastered: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-};
 
-// ────────────────────────────────────────────
-// Page
-// ────────────────────────────────────────────
 export default function FlashcardPage() {
   const words = useAppStore((s) => s.words);
   const reviews = useAppStore((s) => s.reviews);
@@ -62,6 +50,7 @@ export default function FlashcardPage() {
   const [showExamples, setShowExamples] = useState(false);
   const [xpPopups, setXpPopups] = useState<{ id: number; xp: number; color: string }[]>([]);
   const [rating, setRating] = useState<ReviewQuality | null>(null);
+  const [animating, setAnimating] = useState(false);
   const popupCounter = useRef(0);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -100,15 +89,19 @@ export default function FlashcardPage() {
   }, [current]);
 
   const handleFlip = useCallback(() => {
-    setFlipped(true);
+    if (flipped || animating) return;
+    setAnimating(true);
     playSound("flip");
     speak();
-  }, [speak]);
+    setTimeout(() => {
+      setFlipped(true);
+      setAnimating(false);
+    }, 180);
+  }, [flipped, animating, speak]);
 
   const handleRate = useCallback((quality: ReviewQuality) => {
     if (!current || rating !== null) return;
     setRating(quality);
-
     reviewWord(current.id, quality);
 
     const xp = qualityToXP(quality);
@@ -137,7 +130,7 @@ export default function FlashcardPage() {
       triggerHaptic("light");
     }
 
-    const advance = () => {
+    setTimeout(() => {
       if (isLast) {
         const duration = Math.round((Date.now() - startTime) / 1000);
         addGameSession({
@@ -154,9 +147,7 @@ export default function FlashcardPage() {
         setShowExamples(false);
         setRating(null);
       }
-    };
-
-    setTimeout(advance, 350);
+    }, 350);
   }, [current, rating, isLast, xpGained, queue, startTime, reviewWord, addGameSession, grammar.level, addGrammarXP]);
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -175,6 +166,7 @@ export default function FlashcardPage() {
     }
   };
 
+  // ── Empty state ──
   if (queue.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center space-y-4">
@@ -188,6 +180,7 @@ export default function FlashcardPage() {
     );
   }
 
+  // ── Finish screen ──
   if (finished) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center space-y-6">
@@ -241,8 +234,7 @@ export default function FlashcardPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <Link href="/play" className="flex items-center gap-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] text-sm">
-          <ChevronLeft className="w-4 h-4" />
-          Cik
+          <ChevronLeft className="w-4 h-4" /> Cik
         </Link>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-[hsl(var(--muted-foreground))]">{index + 1} / {queue.length}</span>
@@ -261,59 +253,57 @@ export default function FlashcardPage() {
         />
       </div>
 
-      {/* Flip Card */}
+      {/* Card — state-based, no 3D flip */}
       <div
-        className="flip-card mb-4 cursor-pointer"
-        style={{ height: "300px" }}
+        className={cn(
+          "rounded-2xl shadow-lg mb-4 overflow-hidden cursor-pointer transition-opacity duration-150",
+          animating && "opacity-0",
+          !animating && "opacity-100"
+        )}
         onClick={!flipped ? handleFlip : undefined}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <div className={cn("flip-card-inner", flipped && "flipped")}>
+        {!flipped ? (
+          /* ── FRONT ── */
+          <div className="relative bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800 min-h-[240px] flex flex-col items-center justify-center p-8 text-white">
+            {/* decorative circles */}
+            <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/10 rounded-full pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-28 h-28 bg-white/10 rounded-full pointer-events-none" />
 
-          {/* FRONT */}
-          <div className="flip-card-front rounded-2xl overflow-hidden shadow-lg relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800" />
-            <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full" />
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full" />
-
-            <div className="relative h-full flex flex-col items-center justify-center p-8 text-white">
-              <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20 text-white">
-                {STATUS_LABEL[wordStatus]}
-              </div>
-
-              {grammarLevelInfo && (
-                <div className="absolute top-4 right-4 text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-full">
-                  {grammarLevelInfo.label}
-                </div>
-              )}
-
-              <p className="text-xs text-white/60 uppercase tracking-widest mb-3">Ingilizce</p>
-              <h2 className="text-5xl font-black text-center leading-tight mb-2">{current.word}</h2>
-              {current.ipa && (
-                <p className="text-white/70 font-mono text-sm mb-3">{current.ipa}</p>
-              )}
-              {current.contextTag && (
-                <span className="text-[11px] bg-white/15 text-white/80 px-2.5 py-1 rounded-full mb-2">
-                  {current.contextTag}
-                </span>
-              )}
-              <button
-                onClick={(e) => { e.stopPropagation(); speak(); }}
-                className="mt-2 p-2.5 rounded-xl bg-white/20 hover:bg-white/30 transition-colors active:scale-95"
-              >
-                <Volume2 className="w-5 h-5" />
-              </button>
-              <p className="text-white/40 text-xs mt-4">Dokunarak cevir veya kaydır</p>
+            <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20">
+              {STATUS_LABEL[wordStatus]}
             </div>
-          </div>
+            {grammarLevelInfo && (
+              <div className="absolute top-4 right-4 text-[10px] font-bold bg-white/20 px-2 py-1 rounded-full">
+                {grammarLevelInfo.label}
+              </div>
+            )}
 
-          {/* BACK */}
-          <div className="flip-card-back bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-2xl shadow-lg flex flex-col overflow-hidden">
+            <p className="text-xs text-white/60 uppercase tracking-widest mb-3">Ingilizce</p>
+            <h2 className="text-5xl font-black text-center leading-tight mb-2">{current.word}</h2>
+            {current.ipa && <p className="text-white/70 font-mono text-sm mb-3">{current.ipa}</p>}
+            {current.contextTag && (
+              <span className="text-[11px] bg-white/15 text-white/80 px-2.5 py-1 rounded-full mb-2">
+                {current.contextTag}
+              </span>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); speak(); }}
+              className="mt-3 p-2.5 rounded-xl bg-white/20 hover:bg-white/30 transition-colors active:scale-95"
+            >
+              <Volume2 className="w-5 h-5" />
+            </button>
+            <p className="text-white/40 text-xs mt-4">Dokunarak cevir veya kaydır</p>
+          </div>
+        ) : (
+          /* ── BACK ── */
+          <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))]">
+            {/* Word strip */}
             <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[hsl(var(--border))]">
               <div>
-                <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-0.5">Ingilizce</p>
-                <h3 className="text-lg font-black text-[hsl(var(--foreground))]">{current.word}</h3>
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-0.5">Ingilizce</p>
+                <h3 className="text-lg font-black">{current.word}</h3>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); speak(); }}
@@ -323,13 +313,14 @@ export default function FlashcardPage() {
               </button>
             </div>
 
-            <div className="flex-1 flex flex-col justify-center px-5 py-3 space-y-3">
+            {/* Translation */}
+            <div className="px-5 py-4 space-y-3">
               <div>
-                <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-1">Turkce</p>
-                <div className="flex items-end gap-2">
-                  <p className="text-3xl font-black text-[hsl(var(--foreground))]">{current.translation}</p>
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-1">Turkce</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-black">{current.translation}</p>
                   {current.partOfSpeech && (
-                    <span className="text-xs font-semibold text-brand-500 pb-1">{current.partOfSpeech}</span>
+                    <span className="text-xs font-semibold text-brand-500">{current.partOfSpeech}</span>
                   )}
                 </div>
               </div>
@@ -337,7 +328,7 @@ export default function FlashcardPage() {
               {current.examples[0] && (
                 <div className="bg-[hsl(var(--secondary))] rounded-xl p-3 relative">
                   <BookOpen className="absolute top-2.5 right-2.5 w-3.5 h-3.5 text-[hsl(var(--muted-foreground))]/40" />
-                  <p className="text-sm italic text-[hsl(var(--foreground))] leading-relaxed pr-5">
+                  <p className="text-sm italic leading-relaxed pr-5">
                     &ldquo;{current.examples[0].en}&rdquo;
                   </p>
                   <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">{current.examples[0].tr}</p>
@@ -351,11 +342,10 @@ export default function FlashcardPage() {
               )}
             </div>
           </div>
-
-        </div>
+        )}
       </div>
 
-      {/* Diger ornekler */}
+      {/* More examples — shown after flip */}
       {flipped && current.examples.length > 1 && (
         <div className="mb-3 rounded-xl border border-[hsl(var(--border))] overflow-hidden text-sm">
           <button
@@ -369,7 +359,7 @@ export default function FlashcardPage() {
             <div className="divide-y divide-[hsl(var(--border))]">
               {current.examples.map((ex, i) => (
                 <div key={i} className="px-4 py-3 bg-[hsl(var(--card))]">
-                  <p className="text-sm italic text-[hsl(var(--foreground))]">&ldquo;{ex.en}&rdquo;</p>
+                  <p className="text-sm italic">&ldquo;{ex.en}&rdquo;</p>
                   <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">{ex.tr}</p>
                 </div>
               ))}
@@ -378,16 +368,16 @@ export default function FlashcardPage() {
         </div>
       )}
 
-      {/* Rating Buttons */}
+      {/* Actions */}
       {flipped ? (
         <div className="relative">
+          {/* XP popup */}
           {xpPopups.map((p) => (
             <div
               key={p.id}
               className={cn(
-                "absolute left-1/2 -top-8 pointer-events-none z-20",
-                "bg-gradient-to-r text-white text-sm font-black px-3 py-1 rounded-full",
-                "animate-float-up",
+                "absolute left-1/2 -top-8 pointer-events-none z-20 -translate-x-1/2",
+                "text-white text-sm font-black px-3 py-1 rounded-full bg-gradient-to-r animate-float-up",
                 p.color
               )}
             >
@@ -396,50 +386,22 @@ export default function FlashcardPage() {
           ))}
 
           <p className="text-center text-xs text-[hsl(var(--muted-foreground))] mb-2.5 font-medium uppercase tracking-wider">
-            Ne kadar iyi hatirladın?
+            Ne kadar iyi hatırladın?
           </p>
 
           <div className="grid grid-cols-4 gap-2">
-            <RateBtn
-              onClick={() => handleRate(1)}
-              label="Tekrar"
-              interval="Bugun"
-              xp={1}
-              bg="bg-red-500 hover:bg-red-600"
-              icon={<RefreshCw className="w-4 h-4" />}
-              disabled={rating !== null}
-              active={rating === 1}
-            />
-            <RateBtn
-              onClick={() => handleRate(3)}
-              label="Zor"
-              interval={formatInterval(previewI3)}
-              xp={5}
-              bg="bg-orange-500 hover:bg-orange-600"
-              icon={<AlarmClock className="w-4 h-4" />}
-              disabled={rating !== null}
-              active={rating === 3}
-            />
-            <RateBtn
-              onClick={() => handleRate(4)}
-              label="Iyi"
-              interval={formatInterval(previewI4)}
-              xp={8}
-              bg="bg-emerald-500 hover:bg-emerald-600"
-              icon={<Check className="w-4 h-4" />}
-              disabled={rating !== null}
-              active={rating === 4}
-            />
-            <RateBtn
-              onClick={() => handleRate(5)}
-              label="Kolay"
-              interval={formatInterval(previewI5)}
-              xp={10}
-              bg="bg-blue-500 hover:bg-blue-600"
-              icon={<ChevronsRight className="w-4 h-4" />}
-              disabled={rating !== null}
-              active={rating === 5}
-            />
+            <RateBtn onClick={() => handleRate(1)} label="Tekrar" interval="Bugun" xp={1}
+              bg="bg-red-500 hover:bg-red-600" icon={<RefreshCw className="w-4 h-4" />}
+              disabled={rating !== null} active={rating === 1} />
+            <RateBtn onClick={() => handleRate(3)} label="Zor" interval={formatInterval(previewI3)} xp={5}
+              bg="bg-orange-500 hover:bg-orange-600" icon={<AlarmClock className="w-4 h-4" />}
+              disabled={rating !== null} active={rating === 3} />
+            <RateBtn onClick={() => handleRate(4)} label="Iyi" interval={formatInterval(previewI4)} xp={8}
+              bg="bg-emerald-500 hover:bg-emerald-600" icon={<Check className="w-4 h-4" />}
+              disabled={rating !== null} active={rating === 4} />
+            <RateBtn onClick={() => handleRate(5)} label="Kolay" interval={formatInterval(previewI5)} xp={10}
+              bg="bg-blue-500 hover:bg-blue-600" icon={<ChevronsRight className="w-4 h-4" />}
+              disabled={rating !== null} active={rating === 5} />
           </div>
 
           <p className="text-center text-[10px] text-[hsl(var(--muted-foreground))]/50 mt-2">
@@ -462,18 +424,11 @@ export default function FlashcardPage() {
   );
 }
 
-// ────────────────────────────────────────────
 function RateBtn({
   onClick, label, interval, xp, bg, icon, disabled, active,
 }: {
-  onClick: () => void;
-  label: string;
-  interval: string;
-  xp: number;
-  bg: string;
-  icon: React.ReactNode;
-  disabled: boolean;
-  active: boolean;
+  onClick: () => void; label: string; interval: string; xp: number;
+  bg: string; icon: React.ReactNode; disabled: boolean; active: boolean;
 }) {
   return (
     <button
