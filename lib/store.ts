@@ -99,14 +99,16 @@ export const useAppStore = create<AppState>()(
           }
 
           const localWords = get().words;
+          const localReviews = get().reviews;
           const cloudHasData = cloudData.words.length > 0;
           const localHasData = localWords.length > 0;
 
           if (!cloudHasData && localHasData) {
+            // Cloud boş, lokal dolu → lokali cloud'a gönder
             console.log("[sync] Pushing local data to cloud...");
             await pushLocalDataToCloud(
-              get().words,
-              get().reviews,
+              localWords,
+              localReviews,
               get().stats,
               get().gameSessions,
               get().achievements
@@ -116,15 +118,38 @@ export const useAppStore = create<AppState>()(
           }
 
           if (cloudHasData) {
+            // İki tarafı birleştir: cloud + local → union by id
+            const cloudWordMap = new Map(cloudData.words.map((w) => [w.id, w]));
+            const localOnlyWords = localWords.filter((w) => !cloudWordMap.has(w.id));
+            const mergedWords = [...cloudData.words, ...localOnlyWords];
+
+            const mergedReviews = { ...localReviews, ...cloudData.reviews };
+
+            // Başarımları birleştir
+            const cloudBadgeIds = new Set(cloudData.achievements.map((a) => a.badgeId));
+            const localOnlyAchievements = get().achievements.filter((a) => !cloudBadgeIds.has(a.badgeId));
+            const mergedAchievements = [...cloudData.achievements, ...localOnlyAchievements];
+
+            // En iyi stats'ı seç (daha yüksek XP)
+            const cloudStats = cloudData.stats ?? get().stats;
+            const mergedStats = cloudStats.xp >= get().stats.xp ? cloudStats : get().stats;
+
             set({
-              words: cloudData.words,
-              reviews: cloudData.reviews,
-              stats: cloudData.stats ?? get().stats,
-              achievements: cloudData.achievements,
+              words: mergedWords,
+              reviews: mergedReviews,
+              stats: mergedStats,
+              achievements: mergedAchievements,
               gameSessions: cloudData.gameSessions,
               isSyncing: false,
             });
-            console.log(`[sync] Loaded ${cloudData.words.length} words from cloud`);
+
+            // Lokalde fazladan kelimeler varsa cloud'a da yaz
+            if (localOnlyWords.length > 0) {
+              console.log(`[sync] Pushing ${localOnlyWords.length} local-only words to cloud...`);
+              await pushLocalDataToCloud(mergedWords, mergedReviews, mergedStats, get().gameSessions, mergedAchievements);
+            }
+
+            console.log(`[sync] Merged: ${mergedWords.length} words total`);
           } else {
             set({ isSyncing: false });
           }
