@@ -14,7 +14,7 @@ const sr = (seed: number) => { const x = Math.sin(seed + 1) * 10000; return x - 
 type Speaker = "player" | "enemy";
 interface DialogueLine { speaker: Speaker; text: string; }
 
-// ─── CHAPTER DATA (all English) ──────────────────────────────────────────────
+// ─── CHAPTERS ─────────────────────────────────────────────────────────────────
 const CHAPTERS = [
   {
     id: 1, title: "The Gate's Secret", location: "Ancient Temple • Entrance",
@@ -96,129 +96,147 @@ const CHAPTERS = [
 // ─── SCENE BACKGROUNDS ────────────────────────────────────────────────────────
 function SceneBackground({ id }: { id: number }) {
   if (id === 1) return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="sg1" cx="50%" cy="40%"><stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#060a18"/></radialGradient>
-        <radialGradient id="arch1" cx="50%" cy="100%"><stop offset="0%" stopColor="#6366f1" stopOpacity="0.5"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
+        <radialGradient id="arch1" cx="50%" cy="100%"><stop offset="0%" stopColor="#6366f1" stopOpacity="0.6"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
-      <rect width="400" height="260" fill="url(#sg1)"/>
-      {Array.from({length:40},(_,i)=><circle key={i} cx={sr(i*3)*380+10} cy={sr(i*7)*140+5} r={sr(i*11)*1.2+0.3} fill="white" opacity={sr(i*5)*0.7+0.2}/>)}
-      <rect x="0" y="60" width="55" height="200" fill="#111827" rx="3"/>
-      <rect x="0" y="50" width="70" height="18" fill="#1f2937" rx="2"/>
-      <rect x="345" y="60" width="55" height="200" fill="#111827" rx="3"/>
-      <rect x="330" y="50" width="70" height="18" fill="#1f2937" rx="2"/>
-      <ellipse cx="200" cy="260" rx="160" ry="100" fill="url(#arch1)"/>
-      <path d="M 70 260 Q 70 100 200 80 Q 330 100 330 260" fill="none" stroke="#6366f180" strokeWidth="2"/>
-      <rect x="58" y="105" width="6" height="14" fill="#78350f" rx="1"/>
-      <ellipse cx="61" cy="102" rx="5" ry="9" fill="#f97316" opacity="0.9"/>
-      <ellipse cx="61" cy="99" rx="3" ry="6" fill="#fde68a" opacity="0.9"/>
-      <rect x="336" y="105" width="6" height="14" fill="#78350f" rx="1"/>
-      <ellipse cx="339" cy="102" rx="5" ry="9" fill="#f97316" opacity="0.9"/>
-      <ellipse cx="339" cy="99" rx="3" ry="6" fill="#fde68a" opacity="0.9"/>
-      <rect x="0" y="225" width="400" height="35" fill="#0a0f1e"/>
+      <rect width="400" height="700" fill="url(#sg1)"/>
+      {Array.from({length:50},(_,i)=><circle key={i} cx={sr(i*3)*380+10} cy={sr(i*7)*350} r={sr(i*11)*1.4+0.3} fill="white" opacity={sr(i*5)*0.8+0.1}/>)}
+      <rect x="0" y="100" width="60" height="600" fill="#0d1224" rx="3"/>
+      <rect x="-5" y="88" width="78" height="20" fill="#1a2035" rx="3"/>
+      <rect x="340" y="100" width="60" height="600" fill="#0d1224" rx="3"/>
+      <rect x="327" y="88" width="78" height="20" fill="#1a2035" rx="3"/>
+      <ellipse cx="200" cy="700" rx="180" ry="130" fill="url(#arch1)"/>
+      <path d="M 68 700 Q 68 260 200 180 Q 332 260 332 700" fill="none" stroke="#6366f190" strokeWidth="2.5"/>
+      <rect x="65" y="220" width="7" height="18" fill="#78350f" rx="1"/>
+      <ellipse cx="68.5" cy="216" rx="6" ry="10" fill="#f97316" opacity="0.95"/>
+      <ellipse cx="68.5" cy="212" rx="3.5" ry="7" fill="#fde68a" opacity="0.95"/>
+      <rect x="328" y="220" width="7" height="18" fill="#78350f" rx="1"/>
+      <ellipse cx="331.5" cy="216" rx="6" ry="10" fill="#f97316" opacity="0.95"/>
+      <ellipse cx="331.5" cy="212" rx="3.5" ry="7" fill="#fde68a" opacity="0.95"/>
+      <rect x="0" y="580" width="400" height="120" fill="#060c1e"/>
+      {[0,50,100,150,200,250,300,350].map(x=><line key={x} x1={x} y1="580" x2={x+50} y2="700" stroke="#1a2540" strokeWidth="1"/>)}
+      {[50,100,150,200,250,300,350].map(x=><line key={x} x1={x} y1="580" x2={x} y2="700" stroke="#1a2540" strokeWidth="0.5"/>)}
     </svg>
   );
   if (id === 2) return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="sg2" cx="50%" cy="50%"><stop offset="0%" stopColor="#2e1065"/><stop offset="100%" stopColor="#050508"/></radialGradient>
-        <radialGradient id="mist2" cx="50%" cy="80%"><stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
+        <radialGradient id="mist2" cx="50%" cy="90%"><stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.35"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
-      <rect width="400" height="260" fill="url(#sg2)"/>
-      {[0,60,120,180,240,300,360].map(x=><line key={x} x1={x} y1={0} x2={200} y2={260} stroke="#1e1340" strokeWidth="0.5"/>)}
-      {[0,80,160].map(y=><rect key={y} x="0" y={y} width="60" height="75" fill="#0d0820" stroke="#1e1340" strokeWidth="1"/>)}
-      {[0,80,160].map(y=><rect key={y} x="340" y={y} width="60" height="75" fill="#0d0820" stroke="#1e1340" strokeWidth="1"/>)}
-      <rect x="0" y="200" width="400" height="60" fill="url(#mist2)"/>
-      <ellipse cx="200" cy="200" rx="80" ry="50" fill="#8b5cf6" opacity="0.12"/>
-      {Array.from({length:20},(_,i)=><circle key={i} cx={sr(i*4)*380+10} cy={sr(i*9)*80} r={sr(i*6)*1+0.3} fill="#a78bfa" opacity={sr(i*2)*0.4+0.1}/>)}
+      <rect width="400" height="700" fill="url(#sg2)"/>
+      {[0,60,120,180,240,300,360,400].map(x=><line key={x} x1={x} y1={0} x2={200} y2={700} stroke="#1e1340" strokeWidth="0.6"/>)}
+      {[0,100,200,300,400,500,600].map(y=><line key={y} x1={0} y1={y} x2={400} y2={y} stroke="#1a0e42" strokeWidth="0.4"/>)}
+      {[0,100,200,300,400,500].map(y=><rect key={y} x="0" y={y} width="55" height="95" fill="#0a061e" stroke="#1e1340" strokeWidth="1"/>)}
+      {[0,100,200,300,400,500].map(y=><rect key={y} x="345" y={y} width="55" height="95" fill="#0a061e" stroke="#1e1340" strokeWidth="1"/>)}
+      {[60,200,360].map(y=><text key={y} x="25" y={y+25} fontSize="18" fill="#8b5cf640" textAnchor="middle">✦</text>)}
+      {[60,200,360].map(y=><text key={y} x="375" y={y+25} fontSize="18" fill="#8b5cf640" textAnchor="middle">✦</text>)}
+      <rect x="0" y="500" width="400" height="200" fill="url(#mist2)"/>
+      <ellipse cx="200" cy="700" rx="200" ry="80" fill="#8b5cf6" opacity="0.14"/>
+      {Array.from({length:25},(_,i)=><circle key={i} cx={sr(i*4)*380+10} cy={sr(i*9)*300} r={sr(i*6)*1.2+0.3} fill="#a78bfa" opacity={sr(i*2)*0.45+0.1}/>)}
     </svg>
   );
   if (id === 3) return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
       <defs>
-        <linearGradient id="sg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0a1929"/><stop offset="60%" stopColor="#020d1a"/><stop offset="100%" stopColor="#000"/></linearGradient>
-        <radialGradient id="abyss" cx="50%" cy="100%"><stop offset="0%" stopColor="#06b6d4" stopOpacity="0.2"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
+        <linearGradient id="sg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0a1929"/><stop offset="50%" stopColor="#020d1a"/><stop offset="100%" stopColor="#000"/></linearGradient>
+        <radialGradient id="abyss3" cx="50%" cy="100%"><stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
-      <rect width="400" height="260" fill="url(#sg3)"/>
-      {Array.from({length:30},(_,i)=><circle key={i} cx={sr(i*3)*380+10} cy={sr(i*7)*120} r={sr(i*11)*1.3+0.2} fill="#67e8f9" opacity={sr(i*5)*0.5+0.1}/>)}
-      <rect x="0" y="150" width="400" height="110" fill="#000"/>
-      {[0,1,2,3,4,5].map(i=><ellipse key={i} cx="200" cy={150+i*20} rx={180-i*20} ry={8} fill="none" stroke="#06b6d410" strokeWidth="1"/>)}
-      {[0,1,2,3,4,5,6,7].map(i=>(
+      <rect width="400" height="700" fill="url(#sg3)"/>
+      {Array.from({length:40},(_,i)=><circle key={i} cx={sr(i*3)*380+10} cy={sr(i*7)*350} r={sr(i*11)*1.5+0.2} fill="#67e8f9" opacity={sr(i*5)*0.55+0.08}/>)}
+      <rect x="0" y="420" width="400" height="280" fill="#000408"/>
+      {[0,1,2,3,4,5,6].map(i=><ellipse key={i} cx="200" cy={420+i*25} rx={190-i*22} ry={10} fill="none" stroke="#06b6d412" strokeWidth="1.5"/>)}
+      {[0,1,2,3,4,5,6,7,8].map(i=>(
         <g key={i}>
-          <rect x={30+i*48} y="140" width="40" height="14" fill="#0e7490" rx="3" opacity="0.8"/>
-          <rect x={30+i*48} y="140" width="40" height="5" fill="#67e8f9" rx="2" opacity="0.6"/>
+          <rect x={20+i*46} y="406" width="38" height="18" fill="#0e7490" rx="4" opacity="0.85"/>
+          <rect x={20+i*46} y="406" width="38" height="6" fill="#67e8f9" rx="3" opacity="0.7"/>
         </g>
       ))}
-      <rect x="28" y="148" width="344" height="2" fill="#06b6d4" opacity="0.5"/>
-      <ellipse cx="200" cy="260" rx="200" ry="60" fill="url(#abyss)"/>
+      <rect x="18" y="414" width="364" height="2.5" fill="#06b6d4" opacity="0.6"/>
+      <ellipse cx="200" cy="700" rx="200" ry="80" fill="url(#abyss3)"/>
+      {[80,160,240,320].map((x,i)=><polygon key={i} points={`${x},${200+i*10} ${x+10},${215+i*10} ${x+5},${188+i*10}`} fill="#67e8f9" opacity="0.35"/>)}
     </svg>
   );
   if (id === 4) return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="sg4" cx="50%" cy="40%"><stop offset="0%" stopColor="#2d0a3e"/><stop offset="100%" stopColor="#07020e"/></radialGradient>
-        <radialGradient id="sorm" cx="50%" cy="0%"><stop offset="0%" stopColor="#a855f7" stopOpacity="0.4"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
+        <radialGradient id="storm4" cx="50%" cy="0%"><stop offset="0%" stopColor="#a855f7" stopOpacity="0.5"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
-      <rect width="400" height="260" fill="url(#sg4)"/>
-      {[[40,20,80,25],[120,10,100,30],[220,5,120,28],[320,15,80,22],[80,40,90,20],[260,35,100,25]].map(([x,y,w,h],i)=>(
-        <ellipse key={i} cx={x} cy={y} rx={w} ry={h} fill="#1a0a2e" opacity="0.9"/>
+      <rect width="400" height="700" fill="url(#sg4)"/>
+      {[[40,25,85,28],[130,12,105,32],[235,6,130,30],[330,18,85,24],[85,52,95,22],[270,48,105,26]].map(([x,y,w,h],i)=>(
+        <ellipse key={i} cx={x} cy={y} rx={w} ry={h} fill="#180828" opacity="0.95"/>
       ))}
-      <polyline points="250,0 245,40 255,40 242,90" stroke="#a855f7" strokeWidth="1.5" fill="none" opacity="0.7"/>
-      <polyline points="150,0 148,35 158,35 145,80" stroke="#c084fc" strokeWidth="1" fill="none" opacity="0.5"/>
-      <rect x="0" y="0" width="400" height="80" fill="url(#sorm)"/>
-      {[0,40,80,120,160,200,240,280,320,360].map(x=><rect key={x} x={x} y="185" width="30" height="20" fill="#1a0a2e" rx="1"/>)}
-      <rect x="0" y="200" width="400" height="60" fill="#120720"/>
-      {Array.from({length:20},(_,i)=><circle key={i} cx={sr(i*4)*380+10} cy={sr(i*8)*160+20} r={sr(i*6)*1.2+0.3} fill="#d8b4fe" opacity={sr(i*3)*0.4+0.1}/>)}
+      <polyline points="260,0 254,55 266,55 250,120" stroke="#a855f7" strokeWidth="2" fill="none" opacity="0.75"/>
+      <polyline points="155,0 151,48 163,48 148,110" stroke="#c084fc" strokeWidth="1.2" fill="none" opacity="0.5"/>
+      <polyline points="320,0 316,35 325,35 310,80" stroke="#7c3aed" strokeWidth="1" fill="none" opacity="0.4"/>
+      <rect x="0" y="0" width="400" height="110" fill="url(#storm4)"/>
+      {[0,44,88,132,176,220,264,308,352].map(x=><rect key={x} x={x} y="500" width="34" height="26" fill="#180828" rx="2"/>)}
+      <rect x="0" y="520" width="400" height="180" fill="#0f0618"/>
+      {[55,175,315].map(x=><rect key={x} x={x} y="535" width="22" height="35" fill="#7c3aed" opacity="0.55" rx="3"/>)}
+      {[55,175,315].map(x=><rect key={x} x={x+4} y="540" width="14" height="26" fill="#a855f7" opacity="0.75" rx="2"/>)}
+      {Array.from({length:22},(_,i)=><circle key={i} cx={sr(i*4)*380+10} cy={sr(i*8)*420+20} r={sr(i*6)*1.3+0.3} fill="#d8b4fe" opacity={sr(i*3)*0.45+0.08}/>)}
+      <line x1="200" y1="0" x2="200" y2="520" stroke="#a855f7" strokeWidth="0.6" opacity="0.3"/>
     </svg>
   );
   return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="sg5" cx="50%" cy="50%"><stop offset="0%" stopColor="#3d2800"/><stop offset="100%" stopColor="#0d0800"/></radialGradient>
-        <radialGradient id="light5" cx="50%" cy="0%"><stop offset="0%" stopColor="#f59e0b" stopOpacity="0.6"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
-        <radialGradient id="floor5" cx="50%" cy="100%"><stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
+        <radialGradient id="light5" cx="50%" cy="0%"><stop offset="0%" stopColor="#f59e0b" stopOpacity="0.7"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
+        <radialGradient id="floor5" cx="50%" cy="100%"><stop offset="0%" stopColor="#f59e0b" stopOpacity="0.35"/><stop offset="100%" stopColor="transparent" stopOpacity="0"/></radialGradient>
       </defs>
-      <rect width="400" height="260" fill="url(#sg5)"/>
-      <rect x="0" y="0" width="400" height="120" fill="url(#light5)"/>
-      {[30,130,240,340].map((x,i)=>(
+      <rect width="400" height="700" fill="url(#sg5)"/>
+      <rect x="0" y="0" width="400" height="200" fill="url(#light5)"/>
+      {[30,135,245,345].map((x,i)=>(
         <g key={i}>
-          <rect x={x} y="30" width="22" height="200" fill="#92400e" rx="2"/>
-          <rect x={x-4} y="25" width="30" height="14" fill="#b45309" rx="2"/>
-          <line x1={x+11} y1="30" x2={x+11} y2="230" stroke="#f59e0b" strokeWidth="1" opacity="0.4"/>
+          <rect x={x} y="60" width="24" height="460" fill="#7c3200" rx="3"/>
+          <rect x={x-5} y="52" width="34" height="18" fill="#92400e" rx="3"/>
+          <rect x={x-5} y="510" width="34" height="18" fill="#92400e" rx="3"/>
+          <line x1={x+12} y1="60" x2={x+12} y2="530" stroke="#f59e0b" strokeWidth="1.5" opacity="0.35"/>
         </g>
       ))}
-      <rect x="0" y="200" width="400" height="60" fill="url(#floor5)"/>
-      {[50,340].map(x=><g key={x}><rect x={x} y="215" width="30" height="22" fill="#92400e" rx="2"/><rect x={x} y="213" width="30" height="8" fill="#b45309" rx="2"/><rect x={x+12} y="220" width="6" height="6" fill="#f59e0b" rx="1"/></g>)}
-      {Array.from({length:25},(_,i)=><circle key={i} cx={sr(i*4)*360+20} cy={sr(i*7)*200+10} r={sr(i*11)*2+0.5} fill="#fcd34d" opacity={sr(i*3)*0.6+0.1}/>)}
+      {[70,150,200,255,330].map((x,i)=>(
+        <ellipse key={i} cx={x} cy={110+i*12} rx={10+i*2} ry={10+i*2} fill="#f59e0b" opacity="0.22"/>
+      ))}
+      {[90,170,200,230,310].map((x,i)=>(
+        <polygon key={i} points={`${x-6},0 ${x+6},0 ${x+35},700 ${x-35},700`} fill="#f59e0b" opacity={0.03+i*0.01}/>
+      ))}
+      <rect x="0" y="540" width="400" height="160" fill="url(#floor5)"/>
+      {[45,345].map(x=><g key={x}><rect x={x} y="565" width="32" height="26" fill="#7c3200" rx="2"/><rect x={x} y="562" width="32" height="10" fill="#92400e" rx="2"/><rect x={x+13} y="571" width="7" height="8" fill="#f59e0b" rx="1"/></g>)}
+      {Array.from({length:30},(_,i)=><circle key={i} cx={sr(i*4)*360+20} cy={sr(i*7)*500+10} r={sr(i*11)*2.5+0.5} fill="#fcd34d" opacity={sr(i*3)*0.65+0.08}/>)}
     </svg>
   );
 }
 
 // ─── PARTICLES ────────────────────────────────────────────────────────────────
 function Particles({ color }: { color: string }) {
-  const pts = useRef(Array.from({length:10},(_,i)=>({id:i,x:sr(i*3)*100,y:sr(i*7)*100,s:sr(i*11)*4+2,d:3+sr(i*5)*4,dl:sr(i*9)*3,dx:(sr(i*13)-0.5)*40}))).current;
+  const pts = useRef(Array.from({length:12},(_,i)=>({id:i,x:sr(i*3)*100,y:sr(i*7)*100,s:sr(i*11)*5+2,d:3+sr(i*5)*5,dl:sr(i*9)*3,dx:(sr(i*13)-0.5)*50}))).current;
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
       {pts.map(p=>(
         <motion.div key={p.id} className="absolute rounded-full" style={{left:`${p.x}%`,top:`${p.y}%`,width:p.s,height:p.s,backgroundColor:color}}
-          animate={{y:[0,-30,0],x:[0,p.dx,0],opacity:[0.1,0.6,0.1],scale:[1,1.5,1]}}
+          animate={{y:[0,-40,0],x:[0,p.dx,0],opacity:[0.08,0.55,0.08],scale:[1,1.6,1]}}
           transition={{repeat:Infinity,duration:p.d,delay:p.dl,ease:"easeInOut"}}/>
       ))}
     </div>
   );
 }
 
-// ─── PLAYER CHARACTER SVG ────────────────────────────────────────────────────
-function PlayerCharacter({ accent, attacking = false }: { accent: string; attacking?: boolean }) {
+// ─── PLAYER CHARACTER ─────────────────────────────────────────────────────────
+function PlayerCharacter({ accent, attacking = false, size = 1 }: { accent: string; attacking?: boolean; size?: number }) {
+  const w = 72 * size, h = 120 * size;
   return (
-    <svg width="72" height="120" viewBox="0 0 72 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="36" cy="112" rx="22" ry="7" fill={accent} opacity="0.25"/>
+    <svg width={w} height={h} viewBox="0 0 72 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="36" cy="112" rx="22" ry="7" fill={accent} opacity="0.3"/>
       <path d="M20 55 Q14 80 16 110 Q36 105 56 110 Q58 80 52 55 Q44 62 36 60 Q28 62 20 55Z" fill="#1e293b"/>
       <rect x="24" y="48" width="24" height="34" rx="5" fill="#334155"/>
       <rect x="22" y="72" width="28" height="5" rx="2" fill="#475569"/>
       <rect x="33" y="71" width="6" height="7" rx="1" fill="#94a3b8"/>
       <rect x="13" y="50" width="13" height="8" rx="4" fill="#334155"/>
-      <rect x={attacking ? "50" : "46"} y="48" width="13" height="8" rx="4" fill="#334155"/>
+      <rect x={attacking?"50":"46"} y="48" width="13" height="8" rx="4" fill="#334155"/>
       <rect x="31" y="38" width="10" height="12" rx="4" fill="#475569"/>
       <circle cx="36" cy="28" r="16" fill="#475569"/>
       <path d="M20 26 Q36 4 52 26 Q50 38 36 36 Q22 38 20 26Z" fill="#1e293b"/>
@@ -228,10 +246,10 @@ function PlayerCharacter({ accent, attacking = false }: { accent: string; attack
       <circle cx="41" cy="27" r="2.5" fill={accent} opacity="0.9"/>
       <circle cx="31" cy="27" r="1.2" fill="white" opacity="0.7"/>
       <circle cx="41" cy="27" r="1.2" fill="white" opacity="0.7"/>
-      <rect x={attacking ? "56" : "54"} y="10" width="4" height="90" rx="2" fill="#64748b"/>
-      <circle cx={attacking ? "58" : "56"} cy="10" r="7" fill={accent} opacity="0.9"/>
-      <circle cx={attacking ? "58" : "56"} cy="10" r="4" fill="white" opacity="0.7"/>
-      <ellipse cx={attacking ? "58" : "56"} cy="10" rx="12" ry="12" fill={accent} opacity="0.2"/>
+      <rect x={attacking?"56":"54"} y="10" width="4" height="90" rx="2" fill="#64748b"/>
+      <circle cx={attacking?"58":"56"} cy="10" r="7" fill={accent} opacity="0.9"/>
+      <circle cx={attacking?"58":"56"} cy="10" r="4" fill="white" opacity="0.7"/>
+      <ellipse cx={attacking?"58":"56"} cy="10" rx="14" ry="14" fill={accent} opacity="0.18"/>
     </svg>
   );
 }
@@ -243,8 +261,8 @@ function SlashEffect({ show }: { show: boolean }) {
       {show && (
         <motion.div initial={{scaleX:0,opacity:1}} animate={{scaleX:1,opacity:0}} transition={{duration:0.3}}
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-          <div className="w-28 h-1.5 bg-white rounded-full blur-[2px] -rotate-[35deg]"/>
-          <div className="absolute w-28 h-0.5 bg-white/60 rounded-full -rotate-[35deg]"/>
+          <div className="w-32 h-1.5 bg-white rounded-full blur-[2px] -rotate-[35deg]"/>
+          <div className="absolute w-32 h-0.5 bg-white/60 rounded-full -rotate-[35deg]"/>
         </motion.div>
       )}
     </AnimatePresence>
@@ -253,10 +271,7 @@ function SlashEffect({ show }: { show: boolean }) {
 
 // ─── SPEECH BUBBLE ────────────────────────────────────────────────────────────
 function SpeechBubble({ text, accent, side, onNext }: {
-  text: string;
-  accent: string;
-  side: "left" | "right";
-  onNext: () => void;
+  text: string; accent: string; side: "left" | "right"; onNext: () => void;
 }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
@@ -269,7 +284,7 @@ function SpeechBubble({ text, accent, side, onNext }: {
       i++;
       setDisplayed(text.slice(0, i));
       if (i >= text.length) { clearInterval(ref.current!); setDone(true); }
-    }, 22);
+    }, 20);
     return () => clearInterval(ref.current!);
   }, [text]);
 
@@ -277,47 +292,39 @@ function SpeechBubble({ text, accent, side, onNext }: {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.82, y: 10 }}
+      initial={{ opacity: 0, scale: 0.8, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: -6 }}
-      transition={{ type: "spring", damping: 16, stiffness: 220 }}
+      exit={{ opacity: 0, scale: 0.88, y: -4 }}
+      transition={{ type: "spring", damping: 18, stiffness: 240 }}
       className="relative cursor-pointer select-none"
-      style={{ maxWidth: 210 }}
+      style={{ maxWidth: 230 }}
       onClick={() => { if (!done) skip(); else onNext(); }}
     >
-      {/* Bubble body */}
-      <div
-        className="rounded-2xl px-4 py-3"
-        style={{
-          background: "rgba(6, 8, 22, 0.92)",
-          border: `1.5px solid ${accent}70`,
-          backdropFilter: "blur(12px)",
-          boxShadow: `0 6px 28px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.06)`
-        }}
-      >
-        <p className="text-sm font-medium text-white/90 leading-snug" style={{ minHeight: "3.5em" }}>
+      <div className="rounded-2xl px-4 py-3" style={{
+        background: "rgba(5,6,18,0.93)",
+        border: `1.5px solid ${accent}75`,
+        backdropFilter: "blur(14px)",
+        boxShadow: `0 8px 32px ${accent}35, inset 0 1px 0 rgba(255,255,255,0.07)`
+      }}>
+        <p className="text-sm font-medium text-white/90 leading-relaxed" style={{ minHeight: "3.8em" }}>
           {displayed}
-          {!done && (
-            <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.5 }}
-              className="ml-0.5 text-white/40">▌</motion.span>
-          )}
+          {!done && <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.5 }} className="ml-0.5 text-white/35">▌</motion.span>}
         </p>
         {done && (
-          <motion.p animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.1 }}
-            className="text-right text-[10px] font-bold mt-2" style={{ color: accent }}>
+          <motion.p animate={{ opacity: [0.35, 1, 0.35] }} transition={{ repeat: Infinity, duration: 1.1 }}
+            className="text-right text-[10px] font-black mt-2 tracking-wider" style={{ color: accent }}>
             TAP ▶
           </motion.p>
         )}
       </div>
-      {/* Tail pointing down toward the character */}
+      {/* Tail */}
       <div style={{
-        position: "absolute",
-        bottom: -9,
-        [side === "left" ? "left" : "right"]: 24,
+        position: "absolute", bottom: -9,
+        [side === "left" ? "left" : "right"]: 26,
         width: 0, height: 0,
         borderLeft: "9px solid transparent",
         borderRight: "9px solid transparent",
-        borderTop: `10px solid ${accent}70`,
+        borderTop: `10px solid ${accent}75`,
       }} />
     </motion.div>
   );
@@ -369,9 +376,8 @@ export default function StoryPage() {
   const nextWord = () => { const w = poolRef.current[idxRef.current % poolRef.current.length]; idxRef.current++; return w; };
 
   const advanceLine = () => {
-    if (lineIdx < chapter.dialogue.length - 1) {
-      setLineIdx(l => l + 1);
-    } else {
+    if (lineIdx < chapter.dialogue.length - 1) { setLineIdx(l => l + 1); }
+    else {
       setPhase("pre-challenge");
       setTimeout(() => {
         const word = nextWord();
@@ -403,9 +409,8 @@ export default function StoryPage() {
   };
 
   const advanceSuccess = () => {
-    if (successLine < chapter.successDialogue.length - 1) {
-      setSuccessLine(l => l + 1);
-    } else if (chapterIdx === CHAPTERS.length - 1) {
+    if (successLine < chapter.successDialogue.length - 1) { setSuccessLine(l => l + 1); }
+    else if (chapterIdx === CHAPTERS.length - 1) {
       const dur = Math.round((Date.now() - t0Ref.current) / 1000);
       const score = Math.max(10, 100 - mistakes * 15);
       addGameSession({ gameType: "story", score, wordsPracticed: wordsUsed, playedAt: new Date().toISOString(), duration: dur });
@@ -424,7 +429,7 @@ export default function StoryPage() {
       {[...Array(5)].map((_,i)=>(
         <motion.div key={i} className="fixed rounded-full pointer-events-none"
           style={{width:100+i*60,height:100+i*60,left:`${5+i*20}%`,top:`${10+i*15}%`,background:`radial-gradient(circle,#6366f1,transparent)`,opacity:0.06}}
-          animate={{scale:[1,1.4,1]}} transition={{repeat:Infinity,duration:3+i,ease:"easeInOut"}}/>
+          animate={{scale:[1,1.4,1]}} transition={{repeat:Infinity,duration:3+i}}/>
       ))}
       <motion.div initial={{scale:0,rotate:-10}} animate={{scale:1,rotate:0}} transition={{type:"spring",damping:10}} className="text-8xl">📜</motion.div>
       <motion.div initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{delay:0.3}}>
@@ -482,354 +487,428 @@ export default function StoryPage() {
     );
   }
 
-  // ── GAME SCREEN ────────────────────────────────────────────────────────────
+  // ── GAME SCREEN — full bg, constrained content ─────────────────────────────
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{backgroundColor: "#060810"}}>
-      {/* Scene background */}
+    <div className="min-h-screen text-white relative overflow-hidden" style={{ backgroundColor: "#040608" }}>
+
+      {/* Scene background — full bleed */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence mode="wait">
-          <motion.div key={chapterIdx} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.8}} className="absolute inset-0">
+          <motion.div key={chapterIdx} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 1 }} className="absolute inset-0">
             <SceneBackground id={chapter.id} />
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Cinematic vignette */}
+      <div className="absolute inset-0 z-1 pointer-events-none" style={{
+        background: "radial-gradient(ellipse 85% 75% at 50% 60%, transparent 30%, rgba(0,0,0,0.72) 100%)"
+      }} />
 
       <Particles color={chapter.particles} />
 
       {/* Screen flash */}
       <AnimatePresence>
         {flash && (
-          <motion.div key={flash} initial={{opacity:0.5}} animate={{opacity:0}} transition={{duration:0.4}}
+          <motion.div key={flash} initial={{ opacity: 0.55 }} animate={{ opacity: 0 }} transition={{ duration: 0.45 }}
             className="fixed inset-0 pointer-events-none z-50"
-            style={{backgroundColor: flash==="green"?"#22c55e":"#ef4444"}}/>
+            style={{ backgroundColor: flash === "green" ? "#22c55e" : "#ef4444" }} />
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <div className="relative z-20 flex items-center justify-between p-4">
-        <button onClick={()=>setPhase("intro")} className="text-white/50 hover:text-white text-sm">← Çık</button>
-        <div className="flex gap-1.5">
-          {CHAPTERS.map((_,i)=>(
-            <motion.div key={i} className="h-2 rounded-full"
-              animate={{width:i===chapterIdx?24:8,backgroundColor:i<chapterIdx?chapter.accent:i===chapterIdx?"#fff":"rgba(255,255,255,0.2)"}}
-              transition={{duration:0.4}}/>
-          ))}
+      {/* ── CONSTRAINED GAME CONTENT ── */}
+      <div className="relative z-20 max-w-lg mx-auto flex flex-col" style={{ minHeight: "100vh" }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2">
+          <button onClick={() => setPhase("intro")} className="text-white/40 hover:text-white text-sm transition-colors">← Çık</button>
+          <div className="flex gap-2 items-center">
+            {CHAPTERS.map((_,i) => (
+              <motion.div key={i} className="h-1.5 rounded-full"
+                animate={{
+                  width: i === chapterIdx ? 28 : 8,
+                  backgroundColor: i < chapterIdx ? chapter.accent : i === chapterIdx ? "#fff" : "rgba(255,255,255,0.2)"
+                }}
+                transition={{ duration: 0.4 }} />
+            ))}
+          </div>
+          <div className="text-white/35 text-xs font-mono">{chapterIdx + 1} / 5</div>
         </div>
-        <div className="text-white/40 text-sm">{chapterIdx+1}/5</div>
-      </div>
 
-      <AnimatePresence mode="wait">
+        {/* Phase content */}
+        <div className="flex-1 relative">
+          <AnimatePresence mode="wait">
 
-        {/* ── CHAPTER INTRO ── */}
-        {phase==="chapter-intro" && (
-          <motion.div key={`ci${chapterIdx}`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0,scale:1.05}} transition={{duration:0.5}}
-            className="relative z-10 flex flex-col items-center justify-center cursor-pointer"
-            style={{height:"calc(100vh - 60px)"}}
-            onClick={()=>{setLineIdx(0);setPhase("narrative");}}>
-            <motion.div initial={{scale:4,opacity:0}} animate={{scale:1,opacity:0.05}} transition={{duration:1}}
-              className="absolute inset-0 flex items-center justify-center text-[200px] font-black select-none overflow-hidden">
-              {chapterIdx+1}
-            </motion.div>
-            <motion.div initial={{y:50,scale:0.3,opacity:0}} animate={{y:0,scale:1,opacity:1}} transition={{type:"spring",delay:0.2,damping:10}}
-              className="text-[100px] mb-6 relative" style={{filter:`drop-shadow(0 0 40px ${chapter.accent}90)`}}>
-              {chapter.enemy.emoji}
-            </motion.div>
-            <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.5}} className="text-center">
-              <p className="text-xs uppercase tracking-widest mb-1 font-medium" style={{color:chapter.accent}}>
-                Chapter {chapterIdx+1} · {chapter.location}
-              </p>
-              <h2 className="text-3xl font-black mb-1">{chapter.title}</h2>
-              <p className="text-sm text-white/40">{chapter.enemy.subtitle}</p>
-            </motion.div>
-            <motion.p initial={{opacity:0}} animate={{opacity:[0,0.5,0]}} transition={{delay:1.4,repeat:Infinity,duration:1.6}}
-              className="text-white/30 text-xs absolute bottom-8">Tap to continue</motion.p>
-          </motion.div>
-        )}
+            {/* ── CHAPTER INTRO ── */}
+            {phase === "chapter-intro" && (
+              <motion.div key={`ci${chapterIdx}`}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }}
+                transition={{ duration: 0.6 }}
+                className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
+                onClick={() => { setLineIdx(0); setPhase("narrative"); }}>
 
-        {/* ── NARRATIVE (speech bubbles from characters) ── */}
-        {phase==="narrative" && (
-          <motion.div key={`n${chapterIdx}${lineIdx}`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="relative z-10" style={{height:"calc(100vh - 60px)"}}>
-
-            {/* Player speech bubble — left */}
-            <div className="absolute z-20" style={{bottom: 270, left: "3%"}}>
-              <AnimatePresence mode="wait">
-                {currentLine.speaker === "player" ? (
-                  <SpeechBubble
-                    key={`pb-${lineIdx}`}
-                    text={currentLine.text}
-                    accent={chapter.accent}
-                    side="left"
-                    onNext={advanceLine}
-                  />
-                ) : (
-                  <motion.div key="pd" initial={{opacity:0}} animate={{opacity:0.18}}
-                    className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs"
-                    style={{maxWidth:90}}>
-                    ...
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Enemy speech bubble — right */}
-            <div className="absolute z-20 flex justify-end" style={{bottom: 255, right: "3%"}}>
-              <AnimatePresence mode="wait">
-                {currentLine.speaker === "enemy" ? (
-                  <SpeechBubble
-                    key={`eb-${lineIdx}`}
-                    text={currentLine.text}
-                    accent={chapter.accent}
-                    side="right"
-                    onNext={advanceLine}
-                  />
-                ) : (
-                  <motion.div key="ed" initial={{opacity:0}} animate={{opacity:0.18}}
-                    className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs"
-                    style={{maxWidth:90}}>
-                    ...
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Player character — left */}
-            <motion.div className="absolute flex flex-col items-center gap-1" style={{bottom:130, left:"4%"}}
-              animate={{y:[0,-4,0]}} transition={{repeat:Infinity,duration:3,ease:"easeInOut"}}>
-              <PlayerCharacter accent={chapter.accent}/>
-              <span className="text-white/30 text-[10px] tracking-wider uppercase">You</span>
-            </motion.div>
-
-            {/* VS glow divider */}
-            <div className="absolute left-1/2 -translate-x-1/2" style={{bottom:180,width:2,height:80,background:`linear-gradient(to bottom,transparent,${chapter.accent}60,transparent)`}}/>
-
-            {/* Enemy — right */}
-            <motion.div className="absolute flex flex-col items-center gap-1" style={{bottom:120, right:"4%"}}
-              animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:2.6,ease:"easeInOut"}}>
-              <div style={{transform:"scaleX(-1)", filter:`drop-shadow(0 0 20px ${chapter.accent}80)`}}>
-                <span className="text-[90px] block">{chapter.enemy.emoji}</span>
-              </div>
-              <span className="text-white/30 text-[10px] tracking-wider uppercase">{chapter.enemy.name}</span>
-            </motion.div>
-
-            {/* Speaker name indicator at bottom */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-              <motion.div
-                key={currentLine.speaker}
-                initial={{opacity:0, y:4}} animate={{opacity:1, y:0}}
-                className="px-3 py-1 rounded-full text-xs font-semibold"
-                style={{background:`${chapter.accent}30`, border:`1px solid ${chapter.accent}50`, color:chapter.accent}}>
-                {currentLine.speaker === "player" ? "You" : chapter.enemy.name} is speaking
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── PRE-CHALLENGE ── */}
-        {phase==="pre-challenge" && (
-          <motion.div key="pre" className="relative z-10 flex flex-col items-center justify-center" style={{height:"calc(100vh - 60px)"}}>
-            <div className="absolute" style={{bottom:160, left:"8%"}}>
-              <motion.div animate={{x:[0,-5,0]}} transition={{repeat:Infinity,duration:0.7}}>
-                <PlayerCharacter accent={chapter.accent}/>
-              </motion.div>
-              <span className="text-white/30 text-[10px] tracking-wider uppercase block text-center mt-1">You</span>
-            </div>
-
-            <div className="relative flex flex-col items-center">
-              <motion.div
-                animate={{scale:[1,1.12,1,1.2,1],filter:[`brightness(1)`,`brightness(2.5) drop-shadow(0 0 35px ${chapter.accent})`,`brightness(1)`,`brightness(3) drop-shadow(0 0 55px ${chapter.accent})`,`brightness(1)`]}}
-                transition={{duration:2,ease:"easeInOut"}} className="text-[90px]">
-                {chapter.enemy.emoji}
-              </motion.div>
-              {[...Array(8)].map((_,i)=>(
-                <motion.div key={i} className="absolute rounded-full" style={{width:8,height:8,backgroundColor:chapter.accent}}
-                  initial={{x:0,y:0,opacity:0,scale:0}}
-                  animate={{x:Math.cos((i/8)*Math.PI*2)*90,y:Math.sin((i/8)*Math.PI*2)*90,opacity:[0,1,0],scale:[0,1.8,0]}}
-                  transition={{repeat:Infinity,duration:0.85,delay:i*0.1}}/>
-              ))}
-            </div>
-            <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.4}}
-              className="text-base font-bold tracking-wide mt-6" style={{color:chapter.accent}}>
-              ⚡ {chapter.enemy.name} is charging up...
-            </motion.p>
-          </motion.div>
-        )}
-
-        {/* ── CHALLENGE ── */}
-        {phase==="challenge" && challenge && (
-          <motion.div key="ch" initial={{opacity:0}} animate={{opacity:1}} className="relative z-10 flex flex-col" style={{height:"calc(100vh - 60px)"}}>
-
-            {/* Battle arena */}
-            <div className="flex items-end justify-between px-4 pt-3 pb-1">
-
-              {/* Player side */}
-              <div className="flex flex-col items-center gap-1">
-                <motion.div
-                  animate={answered && isCorrect ? {x:[0,14,0],rotate:[0,-8,0]} : {y:[0,-3,0]}}
-                  transition={answered && isCorrect ? {duration:0.35} : {repeat:Infinity,duration:2.8,ease:"easeInOut"}}>
-                  <PlayerCharacter accent={chapter.accent} attacking={answered && isCorrect}/>
+                {/* Big bg chapter number */}
+                <motion.div initial={{ scale: 5, opacity: 0 }} animate={{ scale: 1, opacity: 0.04 }} transition={{ duration: 1.2 }}
+                  className="absolute inset-0 flex items-center justify-center text-[220px] font-black select-none overflow-hidden text-white">
+                  {chapterIdx + 1}
                 </motion.div>
-                <span className="text-white/30 text-[10px] tracking-wider uppercase">You</span>
-                <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-emerald-400 w-full"/>
-                </div>
-              </div>
 
-              {/* VS */}
-              <div className="flex flex-col items-center pb-8 gap-2">
-                <motion.span className="text-xs font-black tracking-widest" style={{color:chapter.accent}}
-                  animate={{opacity:[0.4,1,0.4]}} transition={{repeat:Infinity,duration:1.4}}>VS</motion.span>
-                <div style={{width:1,height:40,background:`linear-gradient(to bottom,transparent,${chapter.accent}50,transparent)`}}/>
-              </div>
+                {/* Enemy reveal */}
+                <motion.div initial={{ y: 60, scale: 0.2, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", delay: 0.15, damping: 9 }}
+                  className="text-[120px] mb-8 relative"
+                  style={{ filter: `drop-shadow(0 0 50px ${chapter.accent}95)` }}>
+                  {chapter.enemy.emoji}
+                </motion.div>
 
-              {/* Enemy side */}
-              <div className="flex flex-col items-center gap-1">
-                {/* Enemy speech bubble */}
-                <div className="mb-2 relative" style={{maxWidth:180}}>
-                  <div className="rounded-2xl px-3 py-2 text-xs font-medium text-white/90"
-                    style={{background:"rgba(6,8,22,0.90)", border:`1.5px solid ${chapter.accent}65`, backdropFilter:"blur(10px)"}}>
-                    {chapter.challengeText}
+                <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+                  className="text-center px-6">
+                  <p className="text-xs uppercase tracking-[0.2em] mb-2 font-bold" style={{ color: chapter.accent }}>
+                    Chapter {chapterIdx + 1} · {chapter.location}
+                  </p>
+                  <h2 className="text-4xl font-black mb-2 leading-tight">{chapter.title}</h2>
+                  <p className="text-sm text-white/35 italic">{chapter.enemy.subtitle}</p>
+                </motion.div>
+
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: [0, 0.45, 0] }}
+                  transition={{ delay: 1.6, repeat: Infinity, duration: 1.8 }}
+                  className="text-white/30 text-xs absolute bottom-10 tracking-widest">
+                  TAP TO CONTINUE
+                </motion.p>
+              </motion.div>
+            )}
+
+            {/* ── NARRATIVE ── */}
+            {phase === "narrative" && (
+              <motion.div key={`n${chapterIdx}${lineIdx}`}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0">
+
+                {/* Player group — left */}
+                <div className="absolute z-20 flex flex-col items-center"
+                  style={{ bottom: 70, left: "20%", transform: "translateX(-50%)" }}>
+
+                  {/* Bubble space above player — always reserved */}
+                  <div style={{ minHeight: 120, display: "flex", alignItems: "flex-end", marginBottom: 10 }}>
+                    <AnimatePresence mode="wait">
+                      {currentLine.speaker === "player" && (
+                        <SpeechBubble key={`pb${lineIdx}`} text={currentLine.text}
+                          accent={chapter.accent} side="left" onNext={advanceLine} />
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <div style={{position:"absolute",bottom:-7,right:20,width:0,height:0,
-                    borderLeft:"7px solid transparent",borderRight:"7px solid transparent",
-                    borderTop:`8px solid ${chapter.accent}65`}}/>
-                </div>
-                <div className="relative">
+
+                  {/* Character with spotlight */}
                   <motion.div
-                    animate={enemyHit ? {x:[-16,16,-10,10,0],scale:[1,0.82,1]} : {y:[0,-6,0]}}
-                    transition={enemyHit ? {duration:0.4} : {repeat:Infinity,duration:2,ease:"easeInOut"}}
-                    className="text-[72px]"
-                    style={{transform:"scaleX(-1)",filter:answered&&isCorrect?"grayscale(1) brightness(0.15)":`drop-shadow(0 0 22px ${chapter.accent}90)`}}>
+                    animate={currentLine.speaker === "player"
+                      ? { filter: `brightness(1.15) drop-shadow(0 0 18px ${chapter.accent}55)`, opacity: 1, scale: 1.05 }
+                      : { filter: "brightness(0.28) saturate(0.2)", opacity: 0.45, scale: 1 }}
+                    transition={{ duration: 0.5 }}>
+                    <PlayerCharacter accent={chapter.accent} size={1.2} />
+                  </motion.div>
+                  <motion.span
+                    animate={{ opacity: currentLine.speaker === "player" ? 0.5 : 0.15 }}
+                    className="text-white text-[10px] tracking-[0.15em] uppercase mt-1">
+                    You
+                  </motion.span>
+                </div>
+
+                {/* Center glow divider */}
+                <div className="absolute left-1/2 -translate-x-1/2 z-10"
+                  style={{ bottom: 160, width: 1.5, height: 100, background: `linear-gradient(to bottom, transparent, ${chapter.accent}55, transparent)` }} />
+
+                {/* Enemy group — right */}
+                <div className="absolute z-20 flex flex-col items-center"
+                  style={{ bottom: 60, right: "20%", transform: "translateX(50%)" }}>
+
+                  {/* Bubble space above enemy */}
+                  <div style={{ minHeight: 120, display: "flex", alignItems: "flex-end", marginBottom: 10 }}>
+                    <AnimatePresence mode="wait">
+                      {currentLine.speaker === "enemy" && (
+                        <SpeechBubble key={`eb${lineIdx}`} text={currentLine.text}
+                          accent={chapter.accent} side="right" onNext={advanceLine} />
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Enemy with spotlight */}
+                  <motion.div
+                    animate={currentLine.speaker === "enemy"
+                      ? { filter: `brightness(1.2) drop-shadow(0 0 30px ${chapter.accent}90) saturate(1.3)`, opacity: 1, scale: 1.08 }
+                      : { filter: "brightness(0.28) saturate(0.2)", opacity: 0.45, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    style={{ transform: "scaleX(-1)" }}>
+                    <span className="text-[110px] block leading-none">{chapter.enemy.emoji}</span>
+                  </motion.div>
+                  <motion.span
+                    animate={{ opacity: currentLine.speaker === "enemy" ? 0.5 : 0.15 }}
+                    className="text-white text-[10px] tracking-[0.15em] uppercase mt-1">
+                    {chapter.enemy.name}
+                  </motion.span>
+                </div>
+
+                {/* Cinematic bottom bar — speaker name */}
+                <div className="absolute bottom-0 left-0 right-0 px-5 py-3 z-20" style={{
+                  background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)"
+                }}>
+                  <AnimatePresence mode="wait">
+                    <motion.div key={currentLine.speaker} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: chapter.accent }}>
+                        ◆ {currentLine.speaker === "player" ? "Word Seeker" : chapter.enemy.name}
+                      </p>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── PRE-CHALLENGE ── */}
+            {phase === "pre-challenge" && (
+              <motion.div key="pre" className="absolute inset-0 flex flex-col items-center justify-center">
+
+                {/* Player far left, charging enemy center */}
+                <div className="absolute" style={{ bottom: 80, left: "12%", transform: "translateX(-50%)" }}>
+                  <motion.div animate={{ x: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 0.65 }}>
+                    <PlayerCharacter accent={chapter.accent} size={1.1} />
+                  </motion.div>
+                  <span className="block text-center text-white/25 text-[10px] tracking-widest uppercase mt-1">You</span>
+                </div>
+
+                {/* Charging enemy */}
+                <div className="relative flex flex-col items-center">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.14, 1, 1.22, 1],
+                      filter: [
+                        `brightness(1)`,
+                        `brightness(2.8) drop-shadow(0 0 40px ${chapter.accent})`,
+                        `brightness(1)`,
+                        `brightness(3.2) drop-shadow(0 0 65px ${chapter.accent})`,
+                        `brightness(1)`
+                      ]
+                    }}
+                    transition={{ duration: 2, ease: "easeInOut" }}
+                    className="text-[110px] leading-none">
                     {chapter.enemy.emoji}
                   </motion.div>
-                  <SlashEffect show={showSlash}/>
+                  {/* Orbit particles */}
+                  {[...Array(8)].map((_,i) => (
+                    <motion.div key={i} className="absolute rounded-full"
+                      style={{ width: 9, height: 9, backgroundColor: chapter.accent }}
+                      initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
+                      animate={{
+                        x: Math.cos((i / 8) * Math.PI * 2) * 100,
+                        y: Math.sin((i / 8) * Math.PI * 2) * 100,
+                        opacity: [0, 1, 0], scale: [0, 2, 0]
+                      }}
+                      transition={{ repeat: Infinity, duration: 0.9, delay: i * 0.11 }} />
+                  ))}
                 </div>
-                <span className="text-white/30 text-[10px] tracking-wider uppercase">{chapter.enemy.name}</span>
-                <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div className="h-full rounded-full" style={{backgroundColor:chapter.accent}}
-                    animate={{width:answered&&isCorrect?"0%":"100%"}} transition={{duration:0.75}}/>
-                </div>
-              </div>
-            </div>
 
-            {/* Question card */}
-            <div className="px-4 flex-1 flex flex-col justify-center gap-3 pt-1">
-              <motion.div initial={{scale:0.88,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring"}}
-                className="rounded-2xl border p-4"
-                style={{borderColor:chapter.accent+"45",background:`linear-gradient(135deg,${chapter.accent}18,${chapter.accent}08)`,boxShadow:`0 0 28px ${chapter.accent}25`}}>
-                <p className="text-white/40 text-xs uppercase tracking-wider mb-2">What does this mean?</p>
-                <p className="text-4xl font-black text-center py-1" style={{textShadow:`0 0 24px ${chapter.accent}`}}>
-                  {challenge.word.word}
-                </p>
-                {challenge.word.ipa && <p className="text-center text-white/30 text-sm mt-1">{challenge.word.ipa}</p>}
-              </motion.div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {challenge.options.map((opt,i)=>{
-                  const ok=opt===challenge.word.translation, sel=opt===selected;
-                  const style: React.CSSProperties = answered
-                    ? ok?{borderColor:"#22c55e",background:"#22c55e18",color:"#86efac"}
-                      : sel?{borderColor:"#ef4444",background:"#ef444418",color:"#fca5a5"}
-                        : {borderColor:"rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.02)",opacity:0.25}
-                    : {borderColor:"rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.07)"};
-                  return (
-                    <motion.button key={opt} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:i*0.07}}
-                      onClick={()=>handleAnswer(opt)} disabled={answered}
-                      className="p-3.5 rounded-xl border text-sm font-semibold transition-all active:scale-95 flex items-center justify-between gap-2 text-white"
-                      style={style}>
-                      <span className="text-left leading-tight">{opt}</span>
-                      {answered&&ok&&<Check className="w-4 h-4 shrink-0 text-green-400"/>}
-                      {answered&&sel&&!ok&&<X className="w-4 h-4 shrink-0 text-red-400"/>}
-                    </motion.button>
-                  );
-                })}
-              </div>
-              {answered&&!isCorrect&&(
-                <motion.p initial={{opacity:0}} animate={{opacity:1}} className="text-center text-white/40 text-sm">
-                  Correct: <span className="text-green-400 font-semibold">{challenge.word.translation}</span>
+                <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                  className="text-base font-bold tracking-wide mt-8" style={{ color: chapter.accent }}>
+                  ⚡ {chapter.enemy.name} is charging...
                 </motion.p>
-              )}
-            </div>
-          </motion.div>
-        )}
+              </motion.div>
+            )}
 
-        {/* ── CHAPTER SUCCESS (speech bubbles) ── */}
-        {phase==="chapter-success" && (
-          <motion.div key={`s${chapterIdx}${successLine}`} initial={{opacity:0}} animate={{opacity:1}}
-            className="relative z-10" style={{height:"calc(100vh - 60px)"}}>
+            {/* ── CHALLENGE ── */}
+            {phase === "challenge" && challenge && (
+              <motion.div key="ch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 flex flex-col">
 
-            {/* Defeated/alive enemy at top center */}
-            <div className="absolute flex flex-col items-center" style={{top:"8%", left:"50%", transform:"translateX(-50%)"}}>
-              {enemyDead ? (
-                <motion.div initial={{scale:1,rotate:0,opacity:1}}
-                  animate={{scale:[1,0.5,0],rotate:[0,-20,180],opacity:[1,0.5,0]}} transition={{duration:1.2}}>
-                  <span className="text-[80px]" style={{filter:"grayscale(1) brightness(0.2)"}}>{chapter.enemy.emoji}</span>
-                </motion.div>
-              ) : (
-                <span className="text-[80px]">{chapter.enemy.emoji}</span>
-              )}
-              {successLine > 0 && (
-                <motion.div initial={{scale:0}} animate={{scale:1}} transition={{type:"spring",delay:0.2}} className="text-5xl mt-2">
-                  {chapterIdx === CHAPTERS.length-1 ? "🏆" : "✨"}
-                </motion.div>
-              )}
-            </div>
+                {/* Battle row */}
+                <div className="flex items-end justify-between px-4 pt-4 pb-2">
 
-            {/* Success speech bubbles */}
-            {(() => {
-              const line = chapter.successDialogue[successLine];
+                  {/* Player side */}
+                  <div className="flex flex-col items-center gap-1">
+                    <motion.div
+                      animate={answered && isCorrect
+                        ? { x: [0, 16, 0], rotate: [0, -10, 0] }
+                        : { y: [0, -4, 0] }}
+                      transition={answered && isCorrect ? { duration: 0.38 } : { repeat: Infinity, duration: 2.8 }}>
+                      <PlayerCharacter accent={chapter.accent} attacking={answered && isCorrect} size={1.1} />
+                    </motion.div>
+                    <span className="text-white/25 text-[10px] tracking-widest uppercase">You</span>
+                    <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-emerald-400 w-full" />
+                    </div>
+                  </div>
+
+                  {/* VS */}
+                  <div className="flex flex-col items-center pb-10 gap-2">
+                    <motion.span className="text-xs font-black tracking-widest" style={{ color: chapter.accent }}
+                      animate={{ opacity: [0.35, 1, 0.35] }} transition={{ repeat: Infinity, duration: 1.4 }}>
+                      VS
+                    </motion.span>
+                    <div style={{ width: 1, height: 44, background: `linear-gradient(to bottom,transparent,${chapter.accent}55,transparent)` }} />
+                  </div>
+
+                  {/* Enemy side */}
+                  <div className="flex flex-col items-center gap-1">
+                    {/* Enemy speech bubble */}
+                    <div className="mb-2" style={{ maxWidth: 175 }}>
+                      <div className="rounded-xl px-3 py-2 text-xs font-medium text-white/85" style={{
+                        background: "rgba(5,6,18,0.9)", border: `1px solid ${chapter.accent}60`,
+                        backdropFilter: "blur(10px)"
+                      }}>
+                        {chapter.challengeText}
+                      </div>
+                      <div style={{ width: 0, height: 0, marginLeft: "auto", marginRight: 20,
+                        borderLeft: "7px solid transparent", borderRight: "7px solid transparent",
+                        borderTop: `8px solid ${chapter.accent}60` }} />
+                    </div>
+
+                    <div className="relative">
+                      <motion.div
+                        animate={enemyHit ? { x: [-18, 18, -12, 12, 0], scale: [1, 0.8, 1] } : { y: [0, -7, 0] }}
+                        transition={enemyHit ? { duration: 0.42 } : { repeat: Infinity, duration: 2 }}
+                        className="text-[80px] leading-none"
+                        style={{
+                          transform: "scaleX(-1)",
+                          filter: answered && isCorrect
+                            ? "grayscale(1) brightness(0.12)"
+                            : `drop-shadow(0 0 24px ${chapter.accent}95)`
+                        }}>
+                        {chapter.enemy.emoji}
+                      </motion.div>
+                      <SlashEffect show={showSlash} />
+                    </div>
+                    <span className="text-white/25 text-[10px] tracking-widest uppercase">{chapter.enemy.name}</span>
+                    <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div className="h-full rounded-full" style={{ backgroundColor: chapter.accent }}
+                        animate={{ width: answered && isCorrect ? "0%" : "100%" }} transition={{ duration: 0.8 }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Question card */}
+                <div className="px-4 flex-1 flex flex-col justify-center gap-3">
+                  <motion.div initial={{ scale: 0.86, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring" }}
+                    className="rounded-2xl border p-5 text-center"
+                    style={{
+                      borderColor: chapter.accent + "45",
+                      background: `linear-gradient(135deg,${chapter.accent}1a,${chapter.accent}0a)`,
+                      boxShadow: `0 0 32px ${chapter.accent}28`
+                    }}>
+                    <p className="text-white/35 text-xs uppercase tracking-widest mb-3">What does this mean?</p>
+                    <p className="text-5xl font-black" style={{ textShadow: `0 0 28px ${chapter.accent}` }}>
+                      {challenge.word.word}
+                    </p>
+                    {challenge.word.ipa && <p className="text-white/25 text-sm mt-2 font-mono">{challenge.word.ipa}</p>}
+                  </motion.div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {challenge.options.map((opt, i) => {
+                      const ok = opt === challenge.word.translation, sel = opt === selected;
+                      const style: React.CSSProperties = answered
+                        ? ok ? { borderColor: "#22c55e", background: "#22c55e1a", color: "#86efac" }
+                          : sel ? { borderColor: "#ef4444", background: "#ef44441a", color: "#fca5a5" }
+                            : { borderColor: "rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.02)", opacity: 0.22 }
+                        : { borderColor: "rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.08)" };
+                      return (
+                        <motion.button key={opt} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+                          onClick={() => handleAnswer(opt)} disabled={answered}
+                          className="p-4 rounded-xl border text-sm font-semibold transition-all active:scale-95 flex items-center justify-between gap-2 text-white"
+                          style={style}>
+                          <span className="text-left leading-tight">{opt}</span>
+                          {answered && ok && <Check className="w-4 h-4 shrink-0 text-green-400" />}
+                          {answered && sel && !ok && <X className="w-4 h-4 shrink-0 text-red-400" />}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                  {answered && !isCorrect && (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-white/35 text-sm">
+                      Correct: <span className="text-green-400 font-semibold">{challenge.word.translation}</span>
+                    </motion.p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── CHAPTER SUCCESS ── */}
+            {phase === "chapter-success" && (() => {
+              const sLine = chapter.successDialogue[successLine];
               return (
-                <>
-                  {/* Player bubble — left */}
-                  <div className="absolute z-20" style={{bottom:270, left:"3%"}}>
-                    <AnimatePresence mode="wait">
-                      {line.speaker === "player" ? (
-                        <SpeechBubble key={`sp-${successLine}`} text={line.text} accent="#22c55e" side="left" onNext={advanceSuccess}/>
-                      ) : (
-                        <motion.div key="spd" initial={{opacity:0}} animate={{opacity:0.18}}
-                          className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs" style={{maxWidth:90}}>
-                          ...
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                <motion.div key={`s${chapterIdx}${successLine}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="absolute inset-0">
+
+                  {/* Defeated/alive enemy top center */}
+                  <div className="absolute flex flex-col items-center" style={{ top: "10%", left: "50%", transform: "translateX(-50%)" }}>
+                    {enemyDead ? (
+                      <motion.div initial={{ scale: 1, rotate: 0, opacity: 1 }}
+                        animate={{ scale: [1, 0.45, 0], rotate: [0, -25, 200], opacity: [1, 0.4, 0] }} transition={{ duration: 1.3 }}>
+                        <span className="text-[90px] leading-none" style={{ filter: "grayscale(1) brightness(0.15)" }}>{chapter.enemy.emoji}</span>
+                      </motion.div>
+                    ) : <span className="text-[90px] leading-none">{chapter.enemy.emoji}</span>}
+                    {successLine > 0 && (
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", delay: 0.2 }} className="text-5xl mt-3">
+                        {chapterIdx === CHAPTERS.length - 1 ? "🏆" : "✨"}
+                      </motion.div>
+                    )}
                   </div>
 
-                  {/* Enemy bubble — right */}
-                  <div className="absolute z-20 flex justify-end" style={{bottom:255, right:"3%"}}>
-                    <AnimatePresence mode="wait">
-                      {line.speaker === "enemy" ? (
-                        <SpeechBubble key={`se-${successLine}`} text={line.text} accent="#22c55e" side="right" onNext={advanceSuccess}/>
-                      ) : (
-                        <motion.div key="sed" initial={{opacity:0}} animate={{opacity:0.18}}
-                          className="px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-white/40 text-xs" style={{maxWidth:90}}>
-                          ...
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  {/* Player group — left */}
+                  <div className="absolute z-20 flex flex-col items-center"
+                    style={{ bottom: 70, left: "20%", transform: "translateX(-50%)" }}>
+                    <div style={{ minHeight: 120, display: "flex", alignItems: "flex-end", marginBottom: 10 }}>
+                      <AnimatePresence mode="wait">
+                        {sLine.speaker === "player" && (
+                          <SpeechBubble key={`sp${successLine}`} text={sLine.text} accent="#22c55e" side="left" onNext={advanceSuccess} />
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <motion.div animate={sLine.speaker === "player"
+                      ? { filter: "brightness(1.15) drop-shadow(0 0 18px #22c55e55)", opacity: 1, scale: 1.05 }
+                      : { filter: "brightness(0.28) saturate(0.2)", opacity: 0.45, scale: 1 }}
+                      transition={{ duration: 0.5 }}>
+                      <PlayerCharacter accent="#22c55e" size={1.2} />
+                    </motion.div>
+                    <span className="text-white/25 text-[10px] tracking-widest uppercase mt-1">You</span>
                   </div>
-                </>
+
+                  {/* Enemy group — right */}
+                  <div className="absolute z-20 flex flex-col items-center"
+                    style={{ bottom: 60, right: "20%", transform: "translateX(50%)" }}>
+                    <div style={{ minHeight: 120, display: "flex", alignItems: "flex-end", marginBottom: 10 }}>
+                      <AnimatePresence mode="wait">
+                        {sLine.speaker === "enemy" && (
+                          <SpeechBubble key={`se${successLine}`} text={sLine.text} accent="#22c55e" side="right" onNext={advanceSuccess} />
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <motion.div animate={sLine.speaker === "enemy"
+                      ? { filter: "brightness(1.1) drop-shadow(0 0 20px #22c55e70)", opacity: 1, scale: 1.05 }
+                      : { filter: "brightness(0.28) saturate(0.2)", opacity: 0.45, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      style={{ transform: "scaleX(-1)" }}>
+                      <span className="text-[110px] leading-none">{chapter.enemy.emoji}</span>
+                    </motion.div>
+                    <span className="text-white/25 text-[10px] tracking-widest uppercase mt-1">{chapter.enemy.name}</span>
+                  </div>
+
+                  {/* Bottom bar */}
+                  <div className="absolute bottom-0 left-0 right-0 px-5 py-3 z-20" style={{
+                    background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)"
+                  }}>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-400">
+                      ◆ {sLine.speaker === "player" ? "Word Seeker" : chapter.enemy.name}
+                    </p>
+                    <motion.p animate={{ opacity: [0.25, 0.6, 0.25] }} transition={{ repeat: Infinity, duration: 1.6 }}
+                      className="text-[10px] text-white/30 mt-1">
+                      {successLine < chapter.successDialogue.length - 1 ? "tap to continue" :
+                        chapterIdx === CHAPTERS.length - 1 ? "collect your victory →" : `chapter ${chapterIdx + 2} →`}
+                    </motion.p>
+                  </div>
+                </motion.div>
               );
             })()}
 
-            {/* Player character */}
-            <motion.div className="absolute flex flex-col items-center gap-1" style={{bottom:130, left:"4%"}}
-              animate={{y:[0,-4,0]}} transition={{repeat:Infinity,duration:3,ease:"easeInOut"}}>
-              <PlayerCharacter accent="#22c55e"/>
-              <span className="text-white/30 text-[10px] tracking-wider uppercase">You</span>
-            </motion.div>
-
-            {/* Advance hint */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-              <motion.div animate={{opacity:[0.3,0.7,0.3]}} transition={{repeat:Infinity,duration:1.5}}
-                className="text-xs text-emerald-400/60">
-                {successLine < chapter.successDialogue.length-1 ? "tap to continue" :
-                  chapterIdx===CHAPTERS.length-1 ? "collect your victory →" : `chapter ${chapterIdx+2} →`}
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-
-      </AnimatePresence>
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }
