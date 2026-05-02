@@ -484,6 +484,13 @@ export const useAppStore = create<AppState>()(
             },
           };
         });
+        // Gramer XP'yi buluta kaydet (cihazlar arası senkron için)
+        const { grammar, stats } = get();
+        const updatedGrammar = {
+          ...grammar,
+          grammarXP: (grammar.grammarXP ?? 0) + amount,
+        };
+        upsertGrammarMeta(updatedGrammar, stats).catch(() => {/* offline */});
       },
 
       checkAchievements: () => {

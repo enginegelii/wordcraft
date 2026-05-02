@@ -29,6 +29,7 @@ const config: Config = {
         "pulse-glow": "pulseGlow 2s ease-in-out infinite",
         "shake": "shake 0.5s ease-in-out",
         "streak-flame": "streakFlame 1s ease-in-out infinite",
+        "float-up": "floatUp 1s ease-out forwards",
       },
       keyframes: {
         cardFlip: {
@@ -57,6 +58,10 @@ const config: Config = {
         streakFlame: {
           "0%, 100%": { transform: "scaleY(1) scaleX(1)" },
           "50%": { transform: "scaleY(1.1) scaleX(0.95)" },
+        },
+        floatUp: {
+          "0%": { transform: "translateY(0px)", opacity: "1" },
+          "100%": { transform: "translateY(-40px)", opacity: "0" },
         },
       },
       fontFamily: {
