@@ -258,6 +258,50 @@ function Particles({ color }: { color: string }) {
   );
 }
 
+// ─── PLAYER CHARACTER SVG ────────────────────────────────────────────────────
+function PlayerCharacter({ accent, attacking = false }: { accent: string; attacking?: boolean }) {
+  return (
+    <svg width="72" height="120" viewBox="0 0 72 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Glow aura at feet */}
+      <ellipse cx="36" cy="112" rx="22" ry="7" fill={accent} opacity="0.25"/>
+      {/* Cloak / Cape */}
+      <path d="M20 55 Q14 80 16 110 Q36 105 56 110 Q58 80 52 55 Q44 62 36 60 Q28 62 20 55Z" fill="#1e293b"/>
+      <path d="M20 55 Q18 75 19 95" stroke="#334155" strokeWidth="1" opacity="0.5"/>
+      <path d="M52 55 Q54 75 53 95" stroke="#334155" strokeWidth="1" opacity="0.5"/>
+      {/* Body / Tunic */}
+      <rect x="24" y="48" width="24" height="34" rx="5" fill="#334155"/>
+      {/* Belt */}
+      <rect x="22" y="72" width="28" height="5" rx="2" fill="#475569"/>
+      <rect x="33" y="71" width="6" height="7" rx="1" fill="#94a3b8"/>
+      {/* Left arm */}
+      <rect x="13" y="50" width="13" height="8" rx="4" fill="#334155"/>
+      {/* Right arm - holding staff */}
+      <rect x={attacking ? "50" : "46"} y="48" width="13" height="8" rx="4" fill="#334155"/>
+      {/* Neck */}
+      <rect x="31" y="38" width="10" height="12" rx="4" fill="#475569"/>
+      {/* Head */}
+      <circle cx="36" cy="28" r="16" fill="#475569"/>
+      {/* Hood */}
+      <path d="M20 26 Q36 4 52 26 Q50 38 36 36 Q22 38 20 26Z" fill="#1e293b"/>
+      <path d="M20 26 Q24 34 36 34 Q48 34 52 26" fill="#253348"/>
+      {/* Face shadow */}
+      <ellipse cx="36" cy="28" rx="10" ry="9" fill="#1a2234" opacity="0.6"/>
+      {/* Glowing eyes */}
+      <circle cx="31" cy="27" r="2.5" fill={accent} opacity="0.9"/>
+      <circle cx="41" cy="27" r="2.5" fill={accent} opacity="0.9"/>
+      <circle cx="31" cy="27" r="1.2" fill="white" opacity="0.7"/>
+      <circle cx="41" cy="27" r="1.2" fill="white" opacity="0.7"/>
+      {/* Staff */}
+      <rect x={attacking ? "56" : "54"} y="10" width="4" height="90" rx="2" fill="#64748b"/>
+      {/* Staff orb top */}
+      <circle cx={attacking ? "58" : "56"} cy="10" r="7" fill={accent} opacity="0.9"/>
+      <circle cx={attacking ? "58" : "56"} cy="10" r="4" fill="white" opacity="0.7"/>
+      {/* Staff glow */}
+      <ellipse cx={attacking ? "58" : "56"} cy="10" rx="12" ry="12" fill={accent} opacity="0.2"/>
+    </svg>
+  );
+}
+
 // ─── SLASH EFFECT ─────────────────────────────────────────────────────────────
 function SlashEffect({ show }: { show: boolean }) {
   return (
@@ -550,14 +594,26 @@ export default function StoryPage() {
         {phase==="narrative" && (
           <motion.div key={`n${chapterIdx}${lineIdx}`} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
             className="relative z-10" style={{height:"calc(100vh - 60px)"}}>
-            {/* Enemy character in scene */}
-            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 flex flex-col items-center">
-              <motion.div
-                animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:2.6,ease:"easeInOut"}}
-                className="text-[90px]" style={{filter:`drop-shadow(0 0 25px ${chapter.accent}70)`}}>
-                {chapter.enemy.emoji}
-              </motion.div>
-            </div>
+
+            {/* Player character — left side, facing right */}
+            <motion.div className="absolute bottom-[130px] left-[4%] flex flex-col items-center gap-1"
+              animate={{y:[0,-4,0]}} transition={{repeat:Infinity,duration:3,ease:"easeInOut"}}>
+              <PlayerCharacter accent={chapter.accent}/>
+              <span className="text-white/30 text-[10px] tracking-wider uppercase">Sen</span>
+            </motion.div>
+
+            {/* VS divider glow */}
+            <div className="absolute bottom-[180px] left-1/2 -translate-x-1/2"
+              style={{width:2,height:80,background:`linear-gradient(to bottom,transparent,${chapter.accent}60,transparent)`}}/>
+
+            {/* Enemy — right side, mirrored (facing left) */}
+            <motion.div className="absolute bottom-[120px] right-[4%] flex flex-col items-center gap-1"
+              animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:2.6,ease:"easeInOut"}}>
+              <div style={{transform:"scaleX(-1)", filter:`drop-shadow(0 0 20px ${chapter.accent}80)`}}>
+                <span className="text-[90px] block">{chapter.enemy.emoji}</span>
+              </div>
+              <span className="text-white/30 text-[10px] tracking-wider uppercase">{chapter.enemy.name}</span>
+            </motion.div>
 
             {/* JRPG Dialogue box at bottom */}
             <DialogueBox
@@ -573,20 +629,31 @@ export default function StoryPage() {
         {/* ── PRE-CHALLENGE ── */}
         {phase==="pre-challenge" && (
           <motion.div key="pre" className="relative z-10 flex flex-col items-center justify-center" style={{height:"calc(100vh - 60px)"}}>
-            <motion.div
-              animate={{scale:[1,1.12,1,1.2,1],filter:[`brightness(1)`,`brightness(2.5) drop-shadow(0 0 35px ${chapter.accent})`,`brightness(1)`,`brightness(3) drop-shadow(0 0 55px ${chapter.accent})`,`brightness(1)`]}}
-              transition={{duration:2,ease:"easeInOut"}} className="text-[100px] mb-8">
-              {chapter.enemy.emoji}
-            </motion.div>
-            {/* Charging ring particles */}
-            {[...Array(8)].map((_,i)=>(
-              <motion.div key={i} className="absolute rounded-full" style={{width:8,height:8,backgroundColor:chapter.accent}}
-                initial={{x:0,y:0,opacity:0,scale:0}}
-                animate={{x:Math.cos((i/8)*Math.PI*2)*90,y:Math.sin((i/8)*Math.PI*2)*90,opacity:[0,1,0],scale:[0,1.8,0]}}
-                transition={{repeat:Infinity,duration:0.85,delay:i*0.1}}/>
-            ))}
+            {/* Player left, enemy right */}
+            <div className="absolute bottom-[160px] left-[8%] flex flex-col items-center gap-1">
+              <motion.div animate={{x:[0,-5,0]}} transition={{repeat:Infinity,duration:0.7,ease:"easeInOut"}}>
+                <PlayerCharacter accent={chapter.accent}/>
+              </motion.div>
+              <span className="text-white/30 text-[10px] tracking-wider uppercase">Sen</span>
+            </div>
+
+            {/* Charging enemy */}
+            <div className="relative flex flex-col items-center">
+              <motion.div
+                animate={{scale:[1,1.12,1,1.2,1],filter:[`brightness(1)`,`brightness(2.5) drop-shadow(0 0 35px ${chapter.accent})`,`brightness(1)`,`brightness(3) drop-shadow(0 0 55px ${chapter.accent})`,`brightness(1)`]}}
+                transition={{duration:2,ease:"easeInOut"}} className="text-[90px]">
+                {chapter.enemy.emoji}
+              </motion.div>
+              {/* Charging ring particles */}
+              {[...Array(8)].map((_,i)=>(
+                <motion.div key={i} className="absolute rounded-full" style={{width:8,height:8,backgroundColor:chapter.accent}}
+                  initial={{x:0,y:0,opacity:0,scale:0}}
+                  animate={{x:Math.cos((i/8)*Math.PI*2)*90,y:Math.sin((i/8)*Math.PI*2)*90,opacity:[0,1,0],scale:[0,1.8,0]}}
+                  transition={{repeat:Infinity,duration:0.85,delay:i*0.1}}/>
+              ))}
+            </div>
             <motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.4}}
-              className="text-base font-bold tracking-wide" style={{color:chapter.accent}}>
+              className="text-base font-bold tracking-wide mt-6" style={{color:chapter.accent}}>
               ⚡ {chapter.enemy.name} saldırıya hazırlanıyor...
             </motion.p>
           </motion.div>
@@ -595,29 +662,65 @@ export default function StoryPage() {
         {/* ── CHALLENGE ── */}
         {phase==="challenge" && challenge && (
           <motion.div key="ch" initial={{opacity:0}} animate={{opacity:1}} className="relative z-10 flex flex-col" style={{height:"calc(100vh - 60px)"}}>
-            {/* Enemy in battle stance - top half */}
-            <div className="flex flex-col items-center pt-4 pb-2">
-              <div className="relative">
+
+            {/* ── Battle arena: player left, enemy right ── */}
+            <div className="flex items-end justify-between px-6 pt-3 pb-1">
+
+              {/* Player side */}
+              <div className="flex flex-col items-center gap-1">
                 <motion.div
-                  animate={enemyHit?{x:[-18,18,-12,12,0],scale:[1,0.8,1]}:{y:[0,-5,0]}}
-                  transition={enemyHit?{duration:0.45}:{repeat:Infinity,duration:2,ease:"easeInOut"}}
-                  className="text-[80px]"
-                  style={{filter:answered&&isCorrect?"grayscale(1) brightness(0.2)":`drop-shadow(0 0 24px ${chapter.accent}90)`}}>
-                  {chapter.enemy.emoji}
+                  animate={answered && isCorrect ? {x:[0,12,0],rotate:[0,-8,0]} : {y:[0,-3,0]}}
+                  transition={answered && isCorrect ? {duration:0.35} : {repeat:Infinity,duration:2.8,ease:"easeInOut"}}>
+                  <PlayerCharacter accent={chapter.accent} attacking={answered && isCorrect}/>
                 </motion.div>
-                <SlashEffect show={showSlash}/>
+                <span className="text-white/30 text-[10px] tracking-wider uppercase">Sen</span>
+                {/* Player HP — always full (narrative hero) */}
+                <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-emerald-400 w-full"/>
+                </div>
               </div>
-              {/* Enemy HP bar */}
-              <div className="w-40 h-2.5 bg-white/10 rounded-full overflow-hidden mt-2">
-                <motion.div className="h-full rounded-full" style={{backgroundColor:chapter.accent}}
-                  animate={{width:answered&&isCorrect?"0%":"100%"}} transition={{duration:0.8}}/>
+
+              {/* VS */}
+              <div className="flex flex-col items-center pb-8 gap-2">
+                <motion.span className="text-xs font-black tracking-widest"
+                  style={{color:chapter.accent}}
+                  animate={{opacity:[0.4,1,0.4]}} transition={{repeat:Infinity,duration:1.4}}>
+                  VS
+                </motion.span>
+                {/* Vertical glow */}
+                <div style={{width:1,height:40,background:`linear-gradient(to bottom,transparent,${chapter.accent}50,transparent)`}}/>
+              </div>
+
+              {/* Enemy side */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="relative">
+                  <motion.div
+                    animate={enemyHit ? {x:[-16,16,-10,10,0],scale:[1,0.82,1]} : {y:[0,-6,0]}}
+                    transition={enemyHit ? {duration:0.4} : {repeat:Infinity,duration:2,ease:"easeInOut"}}
+                    className="text-[72px]"
+                    style={{
+                      transform:"scaleX(-1)",
+                      filter: answered && isCorrect
+                        ? "grayscale(1) brightness(0.15)"
+                        : `drop-shadow(0 0 22px ${chapter.accent}90)`
+                    }}>
+                    {chapter.enemy.emoji}
+                  </motion.div>
+                  <SlashEffect show={showSlash}/>
+                </div>
+                <span className="text-white/30 text-[10px] tracking-wider uppercase">{chapter.enemy.name}</span>
+                {/* Enemy HP bar */}
+                <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div className="h-full rounded-full" style={{backgroundColor:chapter.accent}}
+                    animate={{width: answered && isCorrect ? "0%" : "100%"}} transition={{duration:0.75}}/>
+                </div>
               </div>
             </div>
 
             {/* Question card */}
-            <div className="px-4 flex-1 flex flex-col justify-center gap-3">
+            <div className="px-4 flex-1 flex flex-col justify-center gap-3 pt-1">
               <motion.div initial={{scale:0.88,opacity:0}} animate={{scale:1,opacity:1}} transition={{type:"spring"}}
-                className="rounded-2xl border p-5"
+                className="rounded-2xl border p-4"
                 style={{borderColor:chapter.accent+"45",background:`linear-gradient(135deg,${chapter.accent}18,${chapter.accent}08)`,boxShadow:`0 0 28px ${chapter.accent}25`}}>
                 <p className="text-white/40 text-xs uppercase tracking-wider mb-2">{chapter.challengeText}</p>
                 <p className="text-4xl font-black text-center py-1" style={{textShadow:`0 0 24px ${chapter.accent}`}}>
