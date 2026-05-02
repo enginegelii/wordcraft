@@ -157,7 +157,13 @@ export const useAppStore = create<AppState>()(
             const localOnlyWords = localWords.filter(
               (w) => !cloudWordMap.has(w.id) && !deletedIds.has(w.id)
             );
-            const mergedWords = [...filteredCloudWords, ...localOnlyWords];
+            // Word statüslerini merge edilmiş review'lardan yeniden hesapla
+            // (cloud'da eski/yanlış status olabilir — review interval'i tek gerçek kaynaktır)
+            const mergedWords = [...filteredCloudWords, ...localOnlyWords].map((w) => {
+              const rev = mergedReviews[w.id];
+              if (rev) return { ...w, status: getWordStatusFromInterval(rev.interval) };
+              return w;
+            });
 
             const mergedReviews = { ...localReviews, ...cloudData.reviews };
 
@@ -304,6 +310,9 @@ export const useAppStore = create<AppState>()(
           lastReviewDate: new Date().toISOString().split("T")[0],
         };
 
+        // Mastery bonus için eski statüsü set() ÖNCESINDE oku
+        const oldStatus = get().words.find((w) => w.id === wordId)?.status;
+
         set((state) => ({
           reviews: {
             ...state.reviews,
@@ -318,13 +327,15 @@ export const useAppStore = create<AppState>()(
           },
         }));
 
+        // Güncellenmiş kelimeyi Supabase'e yaz (status dahil)
+        const updatedWord = get().words.find((w) => w.id === wordId);
+        if (updatedWord) upsertWord(updatedWord);
         upsertReview(updatedReview);
 
         get().addXP(qualityToXP(quality));
 
         // Mastery bonus: kelime ilk kez "mastered" olunca +15 XP
-        const oldWord = get().words.find((w) => w.id === wordId);
-        if (newStatus === "mastered" && oldWord?.status !== "mastered") {
+        if (newStatus === "mastered" && oldStatus !== "mastered") {
           get().addXP(15);
         }
 
