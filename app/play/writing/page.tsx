@@ -107,11 +107,12 @@ export default function WritingPage() {
   }, [currentWord, studiedTopicIds]);
 
   const startSession = useCallback(() => {
-    // Prioritize learning/review words, then others
-    const prioritized = [...words].sort((a, b) => {
-      const order = { learning: 0, review: 1, new: 2, mastered: 3 };
-      return (order[a.status] ?? 2) - (order[b.status] ?? 2);
-    });
+    // Her statü grubunu kendi içinde shuffle et, sonra öncelik sırasıyla birleştir
+    const groups: Record<string, typeof words> = { learning: [], review: [], new: [], mastered: [] };
+    words.forEach((w) => { if (groups[w.status]) groups[w.status].push(w); });
+    // Her grubu rastgele karıştır
+    Object.values(groups).forEach((g) => g.sort(() => Math.random() - 0.5));
+    const prioritized = (["learning", "review", "new", "mastered"] as const).flatMap((s) => groups[s]);
     const selected = prioritized.slice(0, SESSION_SIZE);
     if (selected.length === 0) return;
     setSessionWords(selected);
