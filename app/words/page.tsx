@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Volume2, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Volume2, Trash2, Plus, ChevronDown, ChevronUp, PenLine, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { cn, formatRelativeDate } from "@/lib/utils";
-import type { WordStatus } from "@/lib/types";
+import type { WordStatus, SentenceEntry } from "@/lib/types";
 
 const STATUS_LABELS: Record<WordStatus, string> = {
   new: "Yeni",
@@ -27,7 +27,9 @@ export default function WordsPage() {
   const [statusFilter, setStatusFilter] = useState<WordStatus | "all">("all");
   const [tagFilter, setTagFilter] = useState("tümü");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const sentenceEntries = useAppStore((s) => s.sentenceEntries);
   const [expandedExamples, setExpandedExamples] = useState<Set<string>>(new Set());
+  const [expandedSentences, setExpandedSentences] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     return words.filter((w) => {
@@ -244,6 +246,106 @@ export default function WordsPage() {
                   </p>
                 )}
               </div>
+
+              {/* Yazılan Cümleler */}
+              {(() => {
+                const wordSentences = sentenceEntries
+                  .filter((e) => e.wordId === word.id)
+                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                if (wordSentences.length === 0) return null;
+                const isExpanded = expandedSentences.has(word.id);
+                const preview = wordSentences[0];
+                return (
+                  <div className="mt-3 pt-3 border-t border-[hsl(var(--border))]">
+                    <button
+                      onClick={() => setExpandedSentences(prev => {
+                        const next = new Set(prev);
+                        next.has(word.id) ? next.delete(word.id) : next.add(word.id);
+                        return next;
+                      })}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 mb-2"
+                    >
+                      <PenLine className="w-3.5 h-3.5" />
+                      {wordSentences.length} yazılmış cümle
+                      {isExpanded ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+                    </button>
+
+                    {!isExpanded && (
+                      <div className="bg-sky-50 dark:bg-sky-950/20 rounded-xl p-3 space-y-1">
+                        <div className="flex items-center gap-2">
+                          {preview.evaluation.isCorrect
+                            ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                            : <XCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                          <span className={`text-xs font-bold ${preview.evaluation.score >= 70 ? "text-green-600 dark:text-green-400" : preview.evaluation.score >= 50 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"}`}>
+                            {preview.evaluation.score}/100
+                          </span>
+                          <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                            {new Date(preview.createdAt).toLocaleDateString("tr-TR")}
+                          </span>
+                        </div>
+                        <p className="text-sm italic text-[hsl(var(--foreground))]">&ldquo;{preview.userSentence}&rdquo;</p>
+                      </div>
+                    )}
+
+                    {isExpanded && (
+                      <div className="space-y-3">
+                        {wordSentences.map((entry) => (
+                          <div key={entry.id} className="bg-sky-50 dark:bg-sky-950/20 rounded-xl p-3 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {entry.evaluation.isCorrect
+                                ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                                : <XCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                              <span className={`text-xs font-bold ${entry.evaluation.score >= 70 ? "text-green-600 dark:text-green-400" : entry.evaluation.score >= 50 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"}`}>
+                                {entry.evaluation.score}/100
+                              </span>
+                              <span className="text-xs bg-[hsl(var(--secondary))] text-[hsl(var(--muted-foreground))] px-2 py-0.5 rounded-full">
+                                +{entry.xpEarned} XP
+                              </span>
+                              <span className="text-xs text-[hsl(var(--muted-foreground))] ml-auto">
+                                {new Date(entry.createdAt).toLocaleDateString("tr-TR")}
+                              </span>
+                            </div>
+
+                            {/* Kullanıcının cümlesi */}
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))] mb-0.5">Senin cümlen</p>
+                              <p className="text-sm italic">&ldquo;{entry.userSentence}&rdquo;</p>
+                            </div>
+
+                            {/* Geri bildirim */}
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))] mb-0.5">Değerlendirme</p>
+                              <p className="text-xs text-[hsl(var(--foreground))]">{entry.evaluation.feedback}</p>
+                            </div>
+
+                            {/* Düzeltilmiş hali */}
+                            {entry.evaluation.corrected && entry.evaluation.corrected !== entry.userSentence && (
+                              <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))] mb-0.5">Düzeltilmiş</p>
+                                <p className="text-sm text-green-700 dark:text-green-300 italic">&ldquo;{entry.evaluation.corrected}&rdquo;</p>
+                              </div>
+                            )}
+
+                            {/* Alternatifler */}
+                            {entry.evaluation.alternatives?.length > 0 && (
+                              <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))] mb-1">Alternatifler</p>
+                                <div className="space-y-1">
+                                  {entry.evaluation.alternatives.map((alt, i) => (
+                                    <p key={i} className="text-xs text-[hsl(var(--foreground))] pl-2 border-l-2 border-sky-300 dark:border-sky-700">
+                                      {alt}
+                                    </p>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Sil butonu */}
               <div className="px-4 py-2 bg-[hsl(var(--secondary))]/30 border-t border-[hsl(var(--border))] flex justify-end">
