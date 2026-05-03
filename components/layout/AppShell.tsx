@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, BookOpen, Plus, Gamepad2, Settings, Flame,
-  Star, Zap, LogOut, GraduationCap,
+  Star, Zap, LogOut, GraduationCap, NotebookPen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { href: "/add", label: "Ekle", icon: Plus },
   { href: "/play", label: "Oyna", icon: Gamepad2 },
   { href: "/grammar", label: "Gramer", icon: GraduationCap },
+  { href: "/writing-journal", label: "Cümle Günlüğüm", icon: NotebookPen },
   { href: "/settings", label: "Ayarlar", icon: Settings },
 ];
 
