@@ -47,6 +47,16 @@ const GAMES = [
     badge: "Yeni ✨",
   },
   {
+    href: "/play/writing",
+    icon: "✍️",
+    title: "Cümle Yaz",
+    description: "Kelimelerini cümle içinde kullan. Claude gramer ve anlam açısından değerlendirir.",
+    color: "from-sky-500 to-blue-700",
+    shadow: "shadow-sky-500/20",
+    requiredWords: 1,
+    badge: "Yeni ✨",
+  },
+  {
     href: "/play/boss",
     icon: "🐉",
     title: "Boss Battle",

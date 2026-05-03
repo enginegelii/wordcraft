@@ -147,3 +147,26 @@ export function getGrammarLevelFromXP(xp: number, currentLevel: GrammarLevel): G
   }
   return result;
 }
+
+// ─── SENTENCE WRITING TYPES ───────────────────────────────────────────────────
+
+export interface SentenceEvaluation {
+  score: number;        // 0-100
+  isCorrect: boolean;   // score >= 70
+  feedback: string;     // Turkish detailed feedback
+  corrected: string;    // corrected sentence
+  alternatives: string[]; // 2 alternative sentences
+}
+
+export interface SentenceEntry {
+  id: string;
+  wordId: string;
+  word: string;
+  translation: string;
+  directive: string;       // the prompt given to user
+  grammarTopic?: string;   // which grammar topic was targeted
+  userSentence: string;
+  evaluation: SentenceEvaluation;
+  xpEarned: number;
+  createdAt: string;
+}

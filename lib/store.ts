@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   Word, Review, GameSession, UserStats, Achievement,
-  GrammarState, GrammarTopicProgress,
+  GrammarState, GrammarTopicProgress, SentenceEntry,
   getLevelFromXP, BADGES,
   getGrammarLevelFromXP,
   GRAMMAR_LEVEL_ORDER, GRAMMAR_XP_THRESHOLDS,
@@ -25,6 +25,7 @@ import {
   upsertAchievement,
   upsertGrammarProgress,
   upsertGrammarMeta,
+  upsertSentenceEntry,
 } from "./db";
 
 interface AppState {
@@ -36,6 +37,7 @@ interface AppState {
   gameSessions: GameSession[];
   achievements: Achievement[];
   deletedWordIds: string[];   // kalıcı silme takibi
+  sentenceEntries: SentenceEntry[];
   stats: UserStats;
   grammar: GrammarState;
 
@@ -50,6 +52,7 @@ interface AppState {
   getDueWords: () => Word[];
   reviewWord: (wordId: string, quality: ReviewQuality) => void;
   addGameSession: (session: Omit<GameSession, "id">) => void;
+  addSentenceEntry: (entry: SentenceEntry) => void;
   updateStats: (partial: Partial<UserStats>) => void;
   checkAndUpdateStreak: () => void;
   addXP: (amount: number) => void;
@@ -94,6 +97,7 @@ export const useAppStore = create<AppState>()(
       gameSessions: [],
       achievements: [],
       deletedWordIds: [],
+      sentenceEntries: [],
       stats: defaultStats,
       grammar: defaultGrammar,
 
@@ -356,6 +360,13 @@ export const useAppStore = create<AppState>()(
         upsertGameSession(fullSession);
       },
 
+      addSentenceEntry: (entry) => {
+        set((state) => ({
+          sentenceEntries: [entry, ...state.sentenceEntries].slice(0, 500),
+        }));
+        upsertSentenceEntry(entry).catch(() => {/* offline */});
+      },
+
       updateStats: (partial) => {
         set((state) => {
           const newStats = { ...state.stats, ...partial };
@@ -564,6 +575,7 @@ export const useAppStore = create<AppState>()(
         gameSessions: state.gameSessions,
         achievements: state.achievements,
         deletedWordIds: state.deletedWordIds,
+        sentenceEntries: state.sentenceEntries,
         stats: state.stats,
         grammar: state.grammar,
       }),

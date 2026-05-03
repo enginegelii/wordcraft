@@ -336,3 +336,42 @@ export async function pushLocalDataToCloud(
     console.error("[db] pushLocalDataToCloud error:", e);
   }
 }
+
+export async function upsertSentenceEntry(entry: import("./types").SentenceEntry) {
+  if (!isSupabaseConfigured || !supabase) return;
+  const { error } = await supabase.from("sentence_entries").upsert({
+    id: entry.id,
+    word_id: entry.wordId,
+    word: entry.word,
+    translation: entry.translation,
+    directive: entry.directive,
+    grammar_topic: entry.grammarTopic ?? null,
+    user_sentence: entry.userSentence,
+    evaluation: entry.evaluation,
+    xp_earned: entry.xpEarned,
+    created_at: entry.createdAt,
+  });
+  if (error) console.error("[db] upsertSentenceEntry error:", error.message);
+}
+
+export async function fetchSentenceEntries(): Promise<import("./types").SentenceEntry[]> {
+  if (!isSupabaseConfigured || !supabase) return [];
+  const { data, error } = await supabase
+    .from("sentence_entries")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) { console.error("[db] fetchSentenceEntries error:", error.message); return []; }
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    wordId: row.word_id as string,
+    word: row.word as string,
+    translation: row.translation as string,
+    directive: row.directive as string,
+    grammarTopic: row.grammar_topic as string | undefined,
+    userSentence: row.user_sentence as string,
+    evaluation: row.evaluation as import("./types").SentenceEvaluation,
+    xpEarned: row.xp_earned as number,
+    createdAt: row.created_at as string,
+  }));
+}
